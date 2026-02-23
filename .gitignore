@@ -1,1 +1,25 @@
+# Rust
 /target
+Cargo.lock
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# SQLx
+.sqlx/
+
+# Docker
+.docker/
+
+# OS specific
+.DS_Store
+Thumbs.db
+
