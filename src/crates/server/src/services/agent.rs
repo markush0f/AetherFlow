@@ -1,17 +1,16 @@
 use crate::models::agent;
-use crate::repositories::agent_repository::AgentRepository;
+use crate::repositories::agent::Repository as AgentRepository;
 use sea_orm::*;
 use uuid::Uuid;
 
-pub struct AgentService;
+pub struct Service;
 
-impl AgentService {
+impl Service {
     pub async fn create_agent(
         db: &DatabaseConnection,
         slug: String,
         command: String,
     ) -> Result<agent::Model, DbErr> {
-
         let new_agent = agent::ActiveModel {
             id: Set(Uuid::new_v4().to_string()),
             slug: Set(slug),

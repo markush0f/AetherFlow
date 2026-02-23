@@ -1,9 +1,9 @@
 use crate::models::agent::{self, Entity as Agent};
 use sea_orm::*;
 
-pub struct AgentRepository;
+pub struct Repository;
 
-impl AgentRepository {
+impl Repository {
     pub async fn find_all(db: &DatabaseConnection) -> Result<Vec<agent::Model>, DbErr> {
         Agent::find().all(db).await
     }

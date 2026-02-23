@@ -15,12 +15,12 @@ mod services;
 #[derive(OpenApi)]
 #[openapi(
     paths(
-        handlers::agent_handler::create_agent,
-        handlers::agent_handler::list_agents,
-        handlers::agent_handler::get_agent,
+        handlers::agent::create_agent,
+        handlers::agent::list_agents,
+        handlers::agent::get_agent,
     ),
     components(
-        schemas(models::agent::Model, handlers::agent_handler::CreateAgentPayload)
+        schemas(models::agent::Model, handlers::agent::CreateAgentPayload)
     ),
     tags(
         (name = "AetherFlow", description = "Agent Management API")

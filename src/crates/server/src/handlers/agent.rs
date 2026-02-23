@@ -1,5 +1,5 @@
 use crate::models::agent::Model as Agent;
-use crate::services::agent_service::AgentService;
+use crate::services::agent::Service as AgentService;
 use axum::{
     extract::{Json, Path, State},
     http::StatusCode,
