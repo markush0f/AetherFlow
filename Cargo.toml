@@ -1,0 +1,7 @@
+[workspace]
+members = ["src/crates/core", "src/crates/server"]
+resolver = "2"
+
+[profile.release]
+opt-level = "z"
+lto = true

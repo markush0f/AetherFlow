@@ -1,0 +1,18 @@
+# Defined comments: Dependencies for the Axum web server and gateway API
+
+[package]
+name = "aether-server"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Internal crate connection
+aether-core = { path = "../core" }
+
+# Web framework and networking
+axum = "0.8.8"
+tokio = { version = "1.0", features = ["full"] }
+
+# Data handling
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
