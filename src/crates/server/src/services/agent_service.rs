@@ -1,4 +1,5 @@
-use crate::models::agent::{self, Entity as Agent};
+use crate::models::agent;
+use crate::repositories::agent_repository::AgentRepository;
 use sea_orm::*;
 use uuid::Uuid;
 
@@ -10,6 +11,7 @@ impl AgentService {
         slug: String,
         command: String,
     ) -> Result<agent::Model, DbErr> {
+
         let new_agent = agent::ActiveModel {
             id: Set(Uuid::new_v4().to_string()),
             slug: Set(slug),
@@ -17,17 +19,17 @@ impl AgentService {
             status: Set("Idle".to_string()),
         };
 
-        new_agent.insert(db).await
+        AgentRepository::create(db, new_agent).await
     }
 
     pub async fn get_all_agents(db: &DatabaseConnection) -> Result<Vec<agent::Model>, DbErr> {
-        Agent::find().all(db).await
+        AgentRepository::find_all(db).await
     }
 
     pub async fn get_agent_by_id(
         db: &DatabaseConnection,
         id: String,
     ) -> Result<Option<agent::Model>, DbErr> {
-        Agent::find_by_id(id).one(db).await
+        AgentRepository::find_by_id(db, id).await
     }
 }

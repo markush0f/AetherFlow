@@ -7,6 +7,7 @@ use utoipa_swagger_ui::SwaggerUi;
 
 mod handlers;
 mod models;
+mod repositories;
 mod routes;
 mod services;
 
