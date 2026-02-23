@@ -1,6 +1,5 @@
 use axum::{routing::get, Router};
 use sea_orm::DatabaseConnection;
-
 mod agent_routes;
 
 pub fn create_router() -> Router<DatabaseConnection> {
