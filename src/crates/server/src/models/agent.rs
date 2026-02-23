@@ -1,38 +1,17 @@
+use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
-// The core Entity
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct Agent {
-    // Unique identifier for the agent
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
+#[sea_orm(table_name = "agents")]
+pub struct Model {
+    #[sea_orm(primary_key, auto_increment = false)]
     pub id: String,
-    // Human-readable slug for the API (e.g., "summarizer")
     pub slug: String,
-    // The actual system command to run the agent
     pub command: String,
-    // Current operational state
-    pub status: AgentStatus,
+    pub status: String, // Usaremos String por simplicidad inicial con SeaORM
 }
 
-// Enumeration of possible agent states
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub enum AgentStatus {
-    Idle,
-    Running,
-    Error,
-    Offline,
-}
+#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
+pub enum Relation {}
 
-// Data Transfer Objects (DTOs)
-
-#[derive(Debug, Deserialize)]
-pub struct AgentRequest {
-    pub agent_id: String,
-    pub input: String,
-}
-
-#[derive(Debug, Serialize)]
-pub struct AgentResponse {
-    pub output: String,
-    pub error: Option<String>,
-    pub status: String,
-}
+impl ActiveModelBehavior for ActiveModel {}
