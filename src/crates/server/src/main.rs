@@ -1,10 +1,7 @@
-/* AetherFlow Minimal Boot
-   This file only initializes the web server to verify connectivity.
-   No agent logic included.
-*/
-
 use axum::{routing::get, Router};
 use std::net::SocketAddr;
+
+mod models;
 
 #[tokio::main]
 async fn main() {
