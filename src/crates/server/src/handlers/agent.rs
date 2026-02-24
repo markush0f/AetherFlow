@@ -19,7 +19,7 @@ pub struct CreateAgentPayload {
 
 #[utoipa::path(
     post,
-    path = "/agents",
+    path = "/",
     request_body = CreateAgentPayload,
     responses(
         (status = 201, description = "Agent created successfully", body = Agent),
@@ -38,7 +38,7 @@ pub async fn create_agent(
 
 #[utoipa::path(
     get,
-    path = "/agents",
+    path = "/",
     responses(
         (status = 200, description = "List all agents", body = [Agent]),
         (status = 500, description = "Internal server error")
@@ -53,7 +53,7 @@ pub async fn list_agents(State(db): State<DatabaseConnection>) -> impl IntoRespo
 
 #[utoipa::path(
     get,
-    path = "/agents/{id}",
+    path = "/{id}",
     params(
         ("id" = String, Path, description = "Agent database id")
     ),

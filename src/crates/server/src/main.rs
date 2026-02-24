@@ -11,16 +11,11 @@ mod repositories;
 mod routes;
 mod services;
 
-// OpenAPI documentation structure
+// Base OpenAPI documentation
 #[derive(OpenApi)]
 #[openapi(
-    paths(
-        handlers::agent::create_agent,
-        handlers::agent::list_agents,
-        handlers::agent::get_agent,
-    ),
     components(
-        schemas(models::agent::Model, handlers::agent::CreateAgentPayload)
+        schemas(models::agent::Model, models::agent::AgentStatus, handlers::agent::CreateAgentPayload)
     ),
     tags(
         (name = "AetherFlow", description = "Agent Management API")
@@ -34,7 +29,6 @@ async fn main() {
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set in .env file");
 
     println!("AetherFlow: Running migrations...");
-    // We continue using sqlx for migrations for now as it is very straightforward
     let pool = PgPoolOptions::new()
         .connect(&database_url)
         .await
@@ -46,16 +40,21 @@ async fn main() {
         .expect("Failed to run migrations");
     println!("Migrations: SUCCESSFUL");
 
-    // Initialize SeaORM
     println!("AetherFlow: Connecting with SeaORM...");
     let db = Database::connect(&database_url)
         .await
         .expect("Failed to connect to database with SeaORM");
     println!("SeaORM: SUCCESSFUL");
 
-    // Load the Router and merge Swagger UI
-    let app = routes::create_router()
-        .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
+    // Load the Router and collect API docs from routes
+    let (router, api) = routes::create_router();
+
+    // Merge the base doc with the routes doc
+    let mut openapi = ApiDoc::openapi();
+    openapi.merge(api);
+
+    let app = router
+        .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", openapi))
         .with_state(db);
 
     let addr = std::net::SocketAddr::from(([127, 0, 0, 1], 8080));

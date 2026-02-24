@@ -15,7 +15,7 @@ impl Service {
             id: Set(Uuid::new_v4().to_string()),
             slug: Set(slug),
             command: Set(command),
-            status: Set("Idle".to_string()),
+            status: Set(agent::AgentStatus::Idle),
         };
 
         AgentRepository::create(db, new_agent).await
