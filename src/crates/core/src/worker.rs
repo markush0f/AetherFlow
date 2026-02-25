@@ -7,7 +7,7 @@
 use std::process::Stdio;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::process::Command;
-use tokio::sync::{mpsc, oneshot};
+use tokio::sync::mpsc;
 use tokio::time::{timeout, Duration};
 
 use crate::messages::{DirectorCommand, WorkerCommand};
