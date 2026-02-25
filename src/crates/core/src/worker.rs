@@ -31,7 +31,7 @@ impl Worker {
     ) -> Result<mpsc::Sender<WorkerCommand>, String> {
         let (program, args) = runtime.build_command(&entrypoint);
 
-        // 1. Spawn the physical OS process
+        // Spawn the physical OS process
         let mut child = Command::new(program)
             .args(args)
             .current_dir(workdir)
@@ -43,10 +43,10 @@ impl Worker {
         let mut stdin = child.stdin.take().ok_or("Failed to capture stdin")?;
         let mut stdout = child.stdout.take().ok_or("Failed to capture stdout")?;
 
-        // 2. Create the specific Walkie-Talkie for this Worker
+        // Create the specific Walkie-Talkie for this Worker
         let (worker_tx, mut worker_rx) = mpsc::channel::<WorkerCommand>(32);
 
-        // 3. Launch the isolated Actor loop in a background thread
+        // Launch the isolated Actor loop in a background thread
         tokio::spawn(async move {
             loop {
                 /* We use tokio::time::timeout to wait for a new message.

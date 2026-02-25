@@ -1,4 +1,6 @@
-use aether_core::{process_manager::ProcessManager, Runtime};
+use aether_core::{Director, Runtime};
+use std::fs::File;
+use std::io::Write;
 
 #[test]
 fn test_python_command() {
@@ -35,37 +37,54 @@ fn test_remote_api_command() {
 }
 
 #[tokio::test]
-async fn test_spawn_and_communicate() {
-    let manager = ProcessManager::new();
+async fn test_director_spawn_and_communicate() {
+    let director = Director::new();
     let agent_id = "test_agent".to_string();
 
-    // Use 'cat' as a simple echo agent
-    let result = manager
-        .spawn_agent(
+    // Configurar un entorno temporal
+    let temp_dir = std::env::temp_dir();
+    let script_path = temp_dir.join("test_agent.py");
+    let mut file = File::create(&script_path).unwrap();
+
+    // Creamos un script en python que hace un echo de la entrada y luego el delimitador
+    file.write_all(b"import sys\n").unwrap();
+    file.write_all(b"input_data = sys.stdin.readline().strip()\n")
+        .unwrap();
+    file.write_all(b"print(f'ECHO: {input_data}')\n").unwrap();
+    file.write_all(b"print('__AETHER_DONE__')\n").unwrap();
+
+    let message = "hello aether".to_string();
+
+    let result = director
+        .execute_task(
             agent_id.clone(),
-            Runtime::Native,
-            "cat".to_string(),
-            ".".to_string(),
+            Runtime::Python3,
+            script_path.to_str().unwrap().to_string(),
+            temp_dir.to_str().unwrap().to_string(),
+            message.clone(),
         )
         .await;
 
-    assert!(result.is_ok(), "Failed to spawn cat: {:?}", result.err());
-
-    let message = "hello aether";
-    let response = manager.send_to_agent(&agent_id, message).await;
-
-    assert!(
-        response.is_ok(),
-        "Failed to communicate: {:?}",
-        response.err()
-    );
-    assert_eq!(response.unwrap(), message);
+    assert!(result.is_ok(), "Failed to communicate: {:?}", result.err());
+    let response = result.unwrap();
+    assert!(response.contains("ECHO: hello aether"));
 }
 
 #[tokio::test]
-async fn test_agent_not_found() {
-    let manager = ProcessManager::new();
-    let response = manager.send_to_agent("non_existent", "ping").await;
+async fn test_director_spawn_failure() {
+    let director = Director::new();
+
+    // Spawning un script que no existe provocará que el proceso termine inmediatamente
+    // y no envíe el delimitador.
+    let response = director
+        .execute_task(
+            "broken_agent".to_string(),
+            Runtime::Python3,
+            "does_not_exist_in_the_universe.py".to_string(),
+            ".".to_string(),
+            "ping".to_string(),
+        )
+        .await;
+
     assert!(response.is_err());
-    assert!(response.err().unwrap().contains("not found"));
 }
