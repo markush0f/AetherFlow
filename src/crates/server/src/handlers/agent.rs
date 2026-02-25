@@ -17,6 +17,8 @@ pub struct CreateAgentPayload {
     pub command: String,
     /// Runtime environment for the agent (e.g. Python3, NodeJS, Native)
     pub runtime: String,
+    /// Working directory for the agent process
+    pub workdir: String,
 }
 
 #[derive(Deserialize, ToSchema)]
@@ -44,8 +46,14 @@ pub async fn create_agent(
     State(state): State<AppState>,
     Json(payload): Json<CreateAgentPayload>,
 ) -> impl IntoResponse {
-    match AgentService::create_agent(&state.db, payload.slug, payload.command, payload.runtime)
-        .await
+    match AgentService::create_agent(
+        &state.db,
+        payload.slug,
+        payload.command,
+        payload.runtime,
+        payload.workdir,
+    )
+    .await
     {
         Ok(agent) => (StatusCode::CREATED, Json(agent)).into_response(),
         Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response(),

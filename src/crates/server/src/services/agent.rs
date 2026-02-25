@@ -12,12 +12,14 @@ impl Service {
         slug: String,
         command: String,
         runtime: String,
+        workdir: String,
     ) -> Result<agent::Model, DbErr> {
         let new_agent = agent::ActiveModel {
             id: Set(Uuid::new_v4().to_string()),
             slug: Set(slug),
             command: Set(command),
             runtime: Set(runtime),
+            workdir: Set(workdir),
             status: Set(agent::AgentStatus::Idle),
         };
 
@@ -58,7 +60,7 @@ impl Service {
         };
 
         let entrypoint = agent.command;
-        let workdir = format!("./agents_workspace/{}", agent.slug);
+        let workdir = agent.workdir;
 
         /* Pass the dynamic data directly to the Core Actor System */
         director
