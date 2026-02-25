@@ -1,12 +1,22 @@
-/* AetherFlow Core Library
-   Entry point that exposes types, runtime logic, and process management.
+/* crates/core/src/lib.rs
+   Entry point for the AetherFlow Core crate.
+   This file defines the public API that the Web Server will consume.
+   We explicitly hide internal mechanics (like the worker) to maintain a clean API.
 */
 
-pub mod process_manager;
+pub mod director;
+pub mod messages;
 pub mod runtime;
 pub mod types;
 
-/* Re-exporting for convenience, so other crates can use
-   oxide_core::Runtime instead of oxide_core::types::Runtime
+/* We declare the worker module, but we do NOT make it public.
+   The outside world should never spawn a worker manually;
+   they must always go through the Director.
 */
-pub use types::*;
+mod worker;
+
+/* Re-exporting the essential components so the Web Server can import them
+   directly from 'aetherflow_core' without digging into submodules.
+*/
+pub use director::Director;
+pub use types::Runtime;

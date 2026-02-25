@@ -79,11 +79,15 @@ impl Director {
                 if let Some(sender) = table.get(&id) {
                     sender.clone()
                 } else {
-                    // Spawn the new worker actor (logic to be implemented in worker.rs)
-                    // let new_tx = Worker::spawn(id.clone(), runtime, entrypoint, workdir, self.director_tx.clone()).await?;
-
-                    // Mocking the channel creation until we build the Worker
-                    let (new_tx, _new_rx) = mpsc::channel(32);
+                    // Spawn the new worker actor
+                    let new_tx = crate::worker::Worker::spawn(
+                        id.clone(),
+                        runtime,
+                        entrypoint,
+                        workdir,
+                        self.director_tx.clone(),
+                    )
+                    .await?;
 
                     table.insert(id.clone(), new_tx.clone());
                     new_tx
