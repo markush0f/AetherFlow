@@ -1,14 +1,12 @@
-use serde::{Deserialize, Serialize};
+/* AetherFlow Core Library
+   Entry point that exposes types, runtime logic, and process management.
+*/
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct EngineState {
-    pub status: String,
-    pub uptime: u64,
-}
+pub mod process_manager;
+pub mod runtime;
+pub mod types;
 
-pub fn get_initial_state() -> EngineState {
-    EngineState {
-        status: "initialized".to_string(),
-        uptime: 0,
-    }
-}
+/* Re-exporting for convenience, so other crates can use
+   oxide_core::Runtime instead of oxide_core::types::Runtime
+*/
+pub use types::*;
