@@ -15,6 +15,8 @@ pub struct CreateAgentPayload {
     pub slug: String,
     /// System command associated with the agent
     pub command: String,
+    /// Runtime environment for the agent (e.g. Python3, NodeJS, Native)
+    pub runtime: String,
 }
 
 #[utoipa::path(
@@ -30,7 +32,7 @@ pub async fn create_agent(
     State(db): State<DatabaseConnection>,
     Json(payload): Json<CreateAgentPayload>,
 ) -> impl IntoResponse {
-    match AgentService::create_agent(&db, payload.slug, payload.command).await {
+    match AgentService::create_agent(&db, payload.slug, payload.command, payload.runtime).await {
         Ok(agent) => (StatusCode::CREATED, Json(agent)).into_response(),
         Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response(),
     }

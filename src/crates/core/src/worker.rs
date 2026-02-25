@@ -1,4 +1,4 @@
-/* 
+/*
    This module implements the Worker Actor.
    It manages the physical OS process, handles communication via pipes,
    and implements the 'Scale-to-Zero' logic by self-terminating after a period of inactivity.
@@ -50,7 +50,7 @@ impl Worker {
         tokio::spawn(async move {
             loop {
                 /* We use tokio::time::timeout to wait for a new message.
-                   If 60 seconds pass without receiving anything, this returns an Err,
+                   If IDLE_TIMEOUT_SECONDS pass without receiving anything, this returns an Err,
                    triggering our 'Scale-to-Zero' self-destruction.
                 */
                 let message_result =
@@ -106,14 +106,14 @@ impl Worker {
                         break;
                     }
                     Err(_) => {
-                        // Timeout reached! No messages received in 60 seconds.
+                        // Timeout reached! No messages received in IDLE_TIMEOUT_SECONDS seconds.
                         // We break the loop to initiate self-destruction.
                         break;
                     }
                 }
             }
 
-            /* 4. Cleanup Phase: The loop has ended (due to timeout, error, or shutdown request) */
+            // Cleanup Phase: The loop has ended (due to timeout, error, or shutdown request)
             let _ = child.kill().await;
 
             // Notify the Director to remove us from the routing table
@@ -122,7 +122,7 @@ impl Worker {
                 .await;
         });
 
-        // 5. Return the transmission channel to the Director
+        // Return the transmission channel to the Director
         Ok(worker_tx)
     }
 }
