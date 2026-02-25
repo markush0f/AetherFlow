@@ -29,6 +29,7 @@ pub struct Model {
     pub slug: String,
     pub command: String,
     pub runtime: String,
+    pub workdir: String,
     pub status: AgentStatus,
 }
 

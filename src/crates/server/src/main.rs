@@ -10,12 +10,13 @@ mod models;
 mod repositories;
 mod routes;
 mod services;
+pub mod state;
 
 // Base OpenAPI documentation
 #[derive(OpenApi)]
 #[openapi(
     components(
-        schemas(models::agent::Model, models::agent::AgentStatus, handlers::agent::CreateAgentPayload)
+        schemas(models::agent::Model, models::agent::AgentStatus, handlers::agent::CreateAgentPayload, handlers::agent::ExecuteAgentPayload, handlers::agent::ExecuteAgentResponse)
     ),
     tags(
         (name = "AetherFlow", description = "Agent Management API")
@@ -46,6 +47,11 @@ async fn main() {
         .expect("Failed to connect to database with SeaORM");
     println!("SeaORM: SUCCESSFUL");
 
+    println!("AetherFlow: Starting Director Engine...");
+    let director = aether_core::Director::new();
+
+    let app_state = state::AppState { db, director };
+
     // Load the Router and collect API docs from routes
     let (router, api) = routes::create_router();
 
@@ -55,7 +61,7 @@ async fn main() {
 
     let app = router
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", openapi))
-        .with_state(db);
+        .with_state(app_state);
 
     let addr = std::net::SocketAddr::from(([127, 0, 0, 1], 8080));
     println!("AetherFlow active at http://{}", addr);
