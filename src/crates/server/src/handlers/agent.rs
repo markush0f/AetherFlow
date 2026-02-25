@@ -13,12 +13,8 @@ use utoipa::ToSchema;
 pub struct CreateAgentPayload {
     /// Slug identifier for the agent
     pub slug: String,
-    /// System command associated with the agent
-    pub command: String,
-    /// Runtime environment for the agent (e.g. Python3, NodeJS, Native)
-    pub runtime: String,
-    /// Working directory for the agent process
-    pub workdir: String,
+    /// The full HTTP webhook URL where the external agent receives tasks
+    pub endpoint: String,
 }
 
 #[derive(Deserialize, ToSchema)]
@@ -46,15 +42,7 @@ pub async fn create_agent(
     State(state): State<AppState>,
     Json(payload): Json<CreateAgentPayload>,
 ) -> impl IntoResponse {
-    match AgentService::create_agent(
-        &state.db,
-        payload.slug,
-        payload.command,
-        payload.runtime,
-        payload.workdir,
-    )
-    .await
-    {
+    match AgentService::create_agent(&state.db, payload.slug, payload.endpoint).await {
         Ok(agent) => (StatusCode::CREATED, Json(agent)).into_response(),
         Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response(),
     }

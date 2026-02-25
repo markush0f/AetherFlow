@@ -10,17 +10,13 @@ impl Service {
     pub async fn create_agent(
         db: &DatabaseConnection,
         slug: String,
-        command: String,
-        runtime: String,
-        workdir: String,
+        endpoint: String,
     ) -> Result<agent::Model, DbErr> {
         let new_agent = agent::ActiveModel {
             id: Set(Uuid::new_v4().to_string()),
             slug: Set(slug),
-            command: Set(command),
-            runtime: Set(runtime),
-            workdir: Set(workdir),
-            status: Set(agent::AgentStatus::Idle),
+            endpoint: Set(endpoint),
+            status: Set(agent::AgentStatus::Pending),
         };
 
         AgentRepository::create(db, new_agent).await
@@ -51,16 +47,14 @@ impl Service {
             .map_err(|e| format!("Database error: {}", e))?
             .ok_or_else(|| format!("Agent {} not found", agent_id))?;
 
-        /* Map the string from the database to our Core's Runtime enum dynamically */
-        let runtime = match agent.runtime.as_str() {
-            "python3" => Runtime::Python3,
-            "node" => Runtime::NodeJS,
-            "binary" => Runtime::Native,
-            _ => return Err(format!("Unsupported runtime in DB: {}", agent.runtime)),
+        /* We use the RemoteApi runtime for external webhooks */
+        let runtime = Runtime::RemoteApi {
+            endpoint: agent.endpoint.clone(),
+            method: "POST".to_string(), // HTTP POST by default
         };
 
-        let entrypoint = agent.command;
-        let workdir = agent.workdir;
+        let entrypoint = String::new(); // Not used for RemoteApi
+        let workdir = String::new(); // Not used for RemoteApi
 
         /* Pass the dynamic data directly to the Core Actor System */
         director
