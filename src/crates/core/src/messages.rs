@@ -1,4 +1,4 @@
-/* 
+/*
    This module defines the communication protocol (the 'Walkie-Talkie' messages)
    between the Director and the Workers.
 */
