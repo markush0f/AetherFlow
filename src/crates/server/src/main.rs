@@ -71,38 +71,7 @@ async fn main() {
         director,
         http_client: http_client.clone(),
     };
-
-    let ping_client = http_client.clone();
-    let ping_db = db.clone();
-    tokio::spawn(async move {
-        let mut interval = tokio::time::interval(std::time::Duration::from_secs(30));
-        loop {
-            interval.tick().await;
-            if let Ok(agents) = services::agent::Service::get_all_agents(&ping_db).await {
-                for agent in agents {
-                    let is_reachable = ping_client.get(&agent.endpoint).send().await.is_ok();
-                    let new_status = if is_reachable {
-                        models::agent::AgentStatus::Ready
-                    } else {
-                        models::agent::AgentStatus::Unreachable
-                    };
-
-                    if agent.status != new_status {
-                        let _ = services::agent::Service::update_status(
-                            &ping_db,
-                            agent.id.clone(),
-                            new_status.clone(),
-                        )
-                        .await;
-                        info!(
-                            "Agent {} ({}) status changed to {:?}",
-                            agent.slug, agent.id, new_status
-                        );
-                    }
-                }
-            }
-        }
-    });
+    services::monitor::Monitor::start_health_check(db.clone(), http_client.clone());
 
     // Load the Router and collect API docs from routes
     let (router, api) = routes::create_router();
