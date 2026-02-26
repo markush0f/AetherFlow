@@ -34,4 +34,12 @@ impl Service {
     ) -> Result<Option<agent::Model>, DbErr> {
         AgentRepository::find_by_id(db, id).await
     }
+
+    pub async fn update_status(
+        db: &DatabaseConnection,
+        id: String,
+        status: agent::AgentStatus,
+    ) -> Result<Option<agent::Model>, DbErr> {
+        AgentRepository::update_status(db, id, status).await
+    }
 }

@@ -21,4 +21,20 @@ impl Repository {
     ) -> Result<agent::Model, DbErr> {
         data.insert(db).await
     }
+
+    pub async fn update_status(
+        db: &DatabaseConnection,
+        id: String,
+        status: agent::AgentStatus,
+    ) -> Result<Option<agent::Model>, DbErr> {
+        let agent = Agent::find_by_id(id).one(db).await?;
+        if let Some(agent) = agent {
+            let mut active_agent: agent::ActiveModel = agent.into();
+            active_agent.status = Set(status);
+            let updated = active_agent.update(db).await?;
+            Ok(Some(updated))
+        } else {
+            Ok(None)
+        }
+    }
 }
