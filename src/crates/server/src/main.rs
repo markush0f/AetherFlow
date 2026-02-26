@@ -2,6 +2,7 @@ use dotenvy::dotenv;
 use sea_orm::Database;
 use sqlx::postgres::PgPoolOptions;
 use std::env;
+use tower_http::cors::{Any, CorsLayer};
 use tower_http::trace::TraceLayer;
 use tracing::info;
 use utoipa::OpenApi;
@@ -81,7 +82,13 @@ async fn main() {
     let app = router
         .merge(SwaggerUi::new("/docs").url("/api-docs/openapi.json", openapi))
         .with_state(app_state)
-        .layer(TraceLayer::new_for_http());
+        .layer(TraceLayer::new_for_http())
+        .layer(
+            CorsLayer::new()
+                .allow_origin(Any)
+                .allow_methods(Any)
+                .allow_headers(Any),
+        );
 
     let addr = std::net::SocketAddr::from(([127, 0, 0, 1], 8080));
     info!("AetherFlow active at http://{}", addr);
