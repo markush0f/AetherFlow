@@ -45,13 +45,36 @@ pub async fn execute_agent_task(
 
     match agent_result {
         Ok(Some(agent)) => {
-            match AgentClient::execute_task(&state.http_client, &agent.endpoint, &payload.payload)
-                .await
-            {
-                Ok(response) => {
+            let result =
+                AgentClient::execute_task(&state.http_client, &agent.endpoint, &payload.payload)
+                    .await;
+
+            let (response_json, retries_used) = match &result {
+                Ok((res, retries)) => (res.clone(), *retries),
+                Err((err_msg, retries)) => (serde_json::json!({ "error": err_msg }), *retries),
+            };
+
+            // Log the task asynchronously so it doesn't block the response.
+            // (A clone of the DB and other necessary stuff to spawn it)
+            let ping_db = state.db.clone();
+            let agent_id_log = agent.id.clone();
+            let payload_log = payload.payload.clone();
+            tokio::spawn(async move {
+                let _ = crate::services::agent_log::Service::log_task(
+                    &ping_db,
+                    agent_id_log,
+                    payload_log,
+                    response_json,
+                    retries_used,
+                )
+                .await;
+            });
+
+            match result {
+                Ok((response, _)) => {
                     (StatusCode::OK, Json(ExecuteAgentResponse { response })).into_response()
                 }
-                Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, e).into_response(),
+                Err((e, _)) => (StatusCode::INTERNAL_SERVER_ERROR, e).into_response(),
             }
         }
         Ok(None) => (StatusCode::NOT_FOUND, format!("Agent {} not found", id)).into_response(),

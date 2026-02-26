@@ -7,7 +7,7 @@ impl Service {
         client: &Client,
         endpoint: &str,
         payload: &serde_json::Value,
-    ) -> Result<serde_json::Value, String> {
+    ) -> Result<(serde_json::Value, i32), (String, i32)> {
         Self::send_with_retry(client, endpoint, payload).await
     }
 
@@ -15,7 +15,7 @@ impl Service {
         client: &Client,
         endpoint: &str,
         payload: &serde_json::Value,
-    ) -> Result<serde_json::Value, String> {
+    ) -> Result<(serde_json::Value, i32), (String, i32)> {
         let max_retries = 3;
         let mut base_delay = std::time::Duration::from_millis(500);
 
@@ -30,10 +30,10 @@ impl Service {
             match res {
                 Ok(response) => {
                     if response.status().is_success() {
-                        return response
-                            .json::<serde_json::Value>()
-                            .await
-                            .map_err(|e| format!("Failed to parse JSON: {}", e));
+                        let json = response.json::<serde_json::Value>().await.map_err(|e| {
+                            (format!("Failed to parse JSON: {}", e), attempt as i32)
+                        })?;
+                        return Ok((json, attempt as i32));
                     } else if response.status().is_server_error() && attempt < max_retries {
                         tracing::warn!(
                             "Agent {} returned 5xx on attempt {}. Retrying...",
@@ -47,18 +47,20 @@ impl Service {
                             .text()
                             .await
                             .unwrap_or_else(|_| "Unknown error".to_string());
-                        return Err(format!(
-                            "Agent returned HTTP {}: {}",
-                            status.as_u16(),
-                            err_body
+                        return Err((
+                            format!("Agent returned HTTP {}: {}", status.as_u16(), err_body),
+                            attempt as i32,
                         ));
                     }
                 }
                 Err(e) => {
                     if attempt >= max_retries {
-                        return Err(format!(
-                            "Failed to reach agent at {} after {} attempts: {}",
-                            endpoint, max_retries, e
+                        return Err((
+                            format!(
+                                "Failed to reach agent at {} after {} attempts: {}",
+                                endpoint, max_retries, e
+                            ),
+                            attempt as i32,
                         ));
                     }
                     tracing::warn!(
@@ -77,6 +79,9 @@ impl Service {
             }
         }
 
-        Err("Failed to execute task: Unexpected state".to_string())
+        Err((
+            "Failed to execute task: Unexpected state".to_string(),
+            max_retries as i32,
+        ))
     }
 }
