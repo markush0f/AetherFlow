@@ -18,10 +18,10 @@ translatorApp.listen(TRANSLATOR_PORT, () => {
     console.log(`Translator Agent running on http://127.0.0.1:${TRANSLATOR_PORT}`);
 });
 
-// Start Summarizer
-summarizerApp.listen(SUMMARIZER_PORT, () => {
-    console.log(`Summarizer Agent running on http://127.0.0.1:${SUMMARIZER_PORT}`);
-});
+// Start Summarizer (Commented out for testing Unreachable state)
+// summarizerApp.listen(SUMMARIZER_PORT, () => {
+//     console.log(`Summarizer Agent running on http://127.0.0.1:${SUMMARIZER_PORT}`);
+// });
 
 // Start Sentiment
 sentimentApp.listen(SENTIMENT_PORT, () => {
