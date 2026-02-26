@@ -12,13 +12,15 @@ use utoipa::ToSchema;
 #[derive(Deserialize, ToSchema)]
 pub struct ExecuteAgentPayload {
     /// Payload to send to the agent's target endpoint
-    pub payload: String,
+    #[schema(value_type = Object)]
+    pub payload: serde_json::Value,
 }
 
 #[derive(Serialize, ToSchema)]
 pub struct ExecuteAgentResponse {
     /// Agent's stdout response
-    pub response: String,
+    #[schema(value_type = Object)]
+    pub response: serde_json::Value,
 }
 
 #[utoipa::path(

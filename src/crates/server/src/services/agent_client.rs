@@ -6,20 +6,20 @@ impl Service {
     pub async fn execute_task(
         client: &Client,
         endpoint: &str,
-        payload: &str,
-    ) -> Result<String, String> {
+        payload: &serde_json::Value,
+    ) -> Result<serde_json::Value, String> {
         let res = client
             .post(endpoint)
             .header("Content-Type", "application/json")
-            .body(payload.to_string())
+            .json(payload)
             .send()
             .await
             .map_err(|e| format!("Failed to reach agent at {}: {}", endpoint, e))?;
 
         if res.status().is_success() {
-            res.text()
+            res.json::<serde_json::Value>()
                 .await
-                .map_err(|e| format!("Failed to read agent response body: {}", e))
+                .map_err(|e| format!("Failed to parse agent response as JSON: {}", e))
         } else {
             let status = res.status();
             let err_body = res
