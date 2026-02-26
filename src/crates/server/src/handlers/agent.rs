@@ -15,6 +15,8 @@ pub struct CreateAgentPayload {
     pub slug: String,
     /// The full HTTP webhook URL where the external agent receives tasks
     pub endpoint: String,
+    /// Optional source location
+    pub source: Option<String>,
 }
 
 #[utoipa::path(
@@ -30,7 +32,9 @@ pub async fn create_agent(
     State(state): State<AppState>,
     Json(payload): Json<CreateAgentPayload>,
 ) -> impl IntoResponse {
-    match AgentService::create_agent(&state.db, payload.slug, payload.endpoint).await {
+    match AgentService::create_agent(&state.db, payload.slug, payload.endpoint, payload.source)
+        .await
+    {
         Ok(agent) => (StatusCode::CREATED, Json(agent)).into_response(),
         Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response(),
     }

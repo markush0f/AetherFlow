@@ -41,6 +41,9 @@ pub struct Model {
 
     /* The current network status of the agent */
     pub status: AgentStatus,
+
+    /* The generic source path or description where the agent is located */
+    pub source: Option<String>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

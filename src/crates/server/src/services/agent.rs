@@ -11,12 +11,14 @@ impl Service {
         db: &DatabaseConnection,
         slug: String,
         endpoint: String,
+        source: Option<String>,
     ) -> Result<agent::Model, DbErr> {
         let new_agent = agent::ActiveModel {
             id: Set(Uuid::new_v4().to_string()),
             slug: Set(slug),
             endpoint: Set(endpoint),
             status: Set(agent::AgentStatus::Pending),
+            source: Set(source),
         };
 
         AgentRepository::create(db, new_agent).await
