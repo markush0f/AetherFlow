@@ -8,7 +8,7 @@ edition = "2021"
 aether-core = { path = "../core" }
 
 # Web framework and networking
-axum = "0.8.8"
+axum = { version = "0.8.8", features = ["ws"] }
 tokio = { version = "1.48", features = ["full"] }
 
 # Data handling

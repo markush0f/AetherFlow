@@ -13,6 +13,7 @@ pub fn create_router() -> (Router<AppState>, OpenApi) {
             "/health",
             get(|| async { "AetherFlow: Online (ORM Active)" }),
         )
+        .route("/ws", get(crate::handlers::ws::ws_handler))
         .nest("/agents", agent::router())
         .split_for_parts();
 
