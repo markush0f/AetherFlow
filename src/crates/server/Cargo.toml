@@ -33,3 +33,4 @@ utoipa-swagger-ui = { version = "9.0", features = ["axum"] }
 tracing = "0.1.44"
 tracing-subscriber = { version = "0.3.22", features = ["env-filter"] }
 tower-http = { version = "0.6.8", features = ["trace"] }
+reqwest = { version = "0.13.2", features = ["json"] }

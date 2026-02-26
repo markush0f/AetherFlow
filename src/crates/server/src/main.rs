@@ -70,7 +70,7 @@ async fn main() {
     openapi.merge(api);
 
     let app = router
-        .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", openapi))
+        .merge(SwaggerUi::new("/docs").url("/api-docs/openapi.json", openapi))
         .with_state(app_state)
         .layer(TraceLayer::new_for_http());
 
