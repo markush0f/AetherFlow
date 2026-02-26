@@ -60,7 +60,16 @@ async fn main() {
     info!("AetherFlow: Starting Director Engine...");
     let director = aether_core::Director::new();
 
-    let app_state = state::AppState { db, director };
+    let http_client = reqwest::Client::builder()
+        .timeout(std::time::Duration::from_secs(30))
+        .build()
+        .expect("Failed to build HTTP client");
+
+    let app_state = state::AppState {
+        db,
+        director,
+        http_client,
+    };
 
     // Load the Router and collect API docs from routes
     let (router, api) = routes::create_router();

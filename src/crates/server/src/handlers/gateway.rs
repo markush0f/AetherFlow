@@ -43,7 +43,9 @@ pub async fn execute_agent_task(
 
     match agent_result {
         Ok(Some(agent)) => {
-            match AgentClient::execute_task(&agent.endpoint, &payload.payload).await {
+            match AgentClient::execute_task(&state.http_client, &agent.endpoint, &payload.payload)
+                .await
+            {
                 Ok(response) => {
                     (StatusCode::OK, Json(ExecuteAgentResponse { response })).into_response()
                 }

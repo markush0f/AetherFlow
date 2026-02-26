@@ -5,4 +5,5 @@ use sea_orm::DatabaseConnection;
 pub struct AppState {
     pub db: DatabaseConnection,
     pub director: Director,
+    pub http_client: reqwest::Client,
 }

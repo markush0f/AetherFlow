@@ -1,15 +1,13 @@
 use reqwest::Client;
-use std::time::Duration;
 
 pub struct Service;
 
 impl Service {
-    pub async fn execute_task(endpoint: &str, payload: &str) -> Result<String, String> {
-        let client = Client::builder()
-            .timeout(Duration::from_secs(30))
-            .build()
-            .map_err(|e| format!("Failed to build HTTP client: {}", e))?;
-
+    pub async fn execute_task(
+        client: &Client,
+        endpoint: &str,
+        payload: &str,
+    ) -> Result<String, String> {
         let res = client
             .post(endpoint)
             .header("Content-Type", "application/json")
