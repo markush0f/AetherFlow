@@ -18,7 +18,7 @@ pub mod state;
 #[derive(OpenApi)]
 #[openapi(
     components(
-        schemas(models::agent::Model, models::agent::AgentStatus, handlers::agent::CreateAgentPayload, handlers::agent::ExecuteAgentPayload, handlers::agent::ExecuteAgentResponse)
+        schemas(models::agent::Model, models::agent::AgentStatus, handlers::agent::CreateAgentPayload, handlers::gateway::ExecuteAgentPayload, handlers::gateway::ExecuteAgentResponse)
     ),
     tags(
         (name = "AetherFlow", description = "Agent Management API")

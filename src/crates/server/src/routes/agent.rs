@@ -1,4 +1,4 @@
-use crate::handlers::agent;
+use crate::handlers::{agent, gateway};
 use crate::state::AppState;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
@@ -7,5 +7,5 @@ pub fn router() -> OpenApiRouter<AppState> {
     OpenApiRouter::new()
         .routes(routes!(agent::create_agent, agent::list_agents))
         .routes(routes!(agent::get_agent))
-        .routes(routes!(agent::execute_agent_task))
+        .routes(routes!(gateway::execute_agent_task))
 }

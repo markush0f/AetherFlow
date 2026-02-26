@@ -6,7 +6,7 @@ use axum::{
     http::StatusCode,
     response::IntoResponse,
 };
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use utoipa::ToSchema;
 
 #[derive(Deserialize, ToSchema)]
@@ -15,18 +15,6 @@ pub struct CreateAgentPayload {
     pub slug: String,
     /// The full HTTP webhook URL where the external agent receives tasks
     pub endpoint: String,
-}
-
-#[derive(Deserialize, ToSchema)]
-pub struct ExecuteAgentPayload {
-    /// Payload to send to the agent's stdin
-    pub payload: String,
-}
-
-#[derive(Serialize, ToSchema)]
-pub struct ExecuteAgentResponse {
-    /// Agent's stdout response
-    pub response: String,
 }
 
 #[utoipa::path(
@@ -80,38 +68,5 @@ pub async fn get_agent(State(state): State<AppState>, Path(id): Path<String>) ->
         Ok(Some(agent)) => (StatusCode::OK, Json(agent)).into_response(),
         Ok(None) => (StatusCode::NOT_FOUND, "Agent not found").into_response(),
         Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response(),
-    }
-}
-
-#[utoipa::path(
-    post,
-    path = "/{id}/execute",
-    params(
-        ("id" = String, Path, description = "Agent database id")
-    ),
-    request_body = ExecuteAgentPayload,
-    responses(
-        (status = 200, description = "Task executed successfully", body = ExecuteAgentResponse),
-        (status = 404, description = "Agent not found"),
-        (status = 500, description = "Internal server error")
-    )
-)]
-pub async fn execute_agent_task(
-    State(state): State<AppState>,
-    Path(id): Path<String>,
-    Json(payload): Json<ExecuteAgentPayload>,
-) -> impl IntoResponse {
-    match AgentService::execute_agent_task(&state.db, &state.director, id, payload.payload).await {
-        Ok(response) => {
-            let res = ExecuteAgentResponse { response };
-            (StatusCode::OK, Json(res)).into_response()
-        }
-        Err(e) => {
-            if e.contains("not found") {
-                (StatusCode::NOT_FOUND, e).into_response()
-            } else {
-                (StatusCode::INTERNAL_SERVER_ERROR, e).into_response()
-            }
-        }
     }
 }
