@@ -1,4 +1,4 @@
-use crate::models::agent_log::{self, Entity as AgentLog};
+use crate::models::agent_log::{self};
 use sea_orm::*;
 
 pub struct Repository;

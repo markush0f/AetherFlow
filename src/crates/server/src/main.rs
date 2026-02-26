@@ -29,6 +29,7 @@ struct ApiDoc;
 
 #[tokio::main]
 async fn main() {
+    // Load environment variables from the `.env` file if present
     dotenv().ok();
 
     tracing_subscriber::fmt()
@@ -38,6 +39,7 @@ async fn main() {
         )
         .init();
 
+    // Fetch database connection string from environment
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set in .env file");
 
     info!("AetherFlow: Running migrations...");
@@ -61,16 +63,20 @@ async fn main() {
     info!("AetherFlow: Starting Director Engine...");
     let director = aether_core::Director::new();
 
+    // Set up an HTTP client with a 30s timeout to communicate with our agents
     let http_client = reqwest::Client::builder()
         .timeout(std::time::Duration::from_secs(30))
         .build()
         .expect("Failed to build HTTP client");
 
+    // Bundle context dependencies to inject into Axum handlers
     let app_state = state::AppState {
         db: db.clone(),
         director,
         http_client: http_client.clone(),
     };
+
+    // Spawn the background worker that pings agents to monitor their health
     services::monitor::Monitor::start_health_check(db.clone(), http_client.clone());
 
     // Load the Router and collect API docs from routes
@@ -80,10 +86,12 @@ async fn main() {
     let mut openapi = ApiDoc::openapi();
     openapi.merge(api);
 
+    // Build the Axum application router
     let app = router
         .merge(SwaggerUi::new("/docs").url("/api-docs/openapi.json", openapi))
         .with_state(app_state)
         .layer(TraceLayer::new_for_http())
+        // Apply CORS middleware to allow requests from our web dashboard
         .layer(
             CorsLayer::new()
                 .allow_origin(Any)
@@ -94,6 +102,7 @@ async fn main() {
     let addr = std::net::SocketAddr::from(([127, 0, 0, 1], 8080));
     info!("AetherFlow active at http://{}", addr);
 
+    // Bind the TCP listener and start serving the Axum web application
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
     axum::serve(listener, app).await.unwrap();
 }

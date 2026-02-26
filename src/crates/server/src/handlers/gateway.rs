@@ -41,21 +41,24 @@ pub async fn execute_agent_task(
     Path(id): Path<String>,
     Json(payload): Json<ExecuteAgentPayload>,
 ) -> impl IntoResponse {
+    // 1. Fetch the requested Agent from PostgreSQL database
     let agent_result = AgentService::get_agent_by_id(&state.db, id.clone()).await;
 
     match agent_result {
         Ok(Some(agent)) => {
+            // 2. Perform resilient execution call to target agent node
             let result =
                 AgentClient::execute_task(&state.http_client, &agent.endpoint, &payload.payload)
                     .await;
 
+            // Extract valid JSON from the final response parsing
             let (response_json, retries_used) = match &result {
                 Ok((res, retries)) => (res.clone(), *retries),
                 Err((err_msg, retries)) => (serde_json::json!({ "error": err_msg }), *retries),
             };
 
-            // Log the task asynchronously so it doesn't block the response.
-            // (A clone of the DB and other necessary stuff to spawn it)
+            // 3. Log the task asynchronously in PostgreSQL so it never blocks the HTTP response to the client
+            // We clone the necessary variables (DB pool, keys, values) to let Tokio spawn it separately
             let ping_db = state.db.clone();
             let agent_id_log = agent.id.clone();
             let payload_log = payload.payload.clone();
@@ -70,6 +73,7 @@ pub async fn execute_agent_task(
                 .await;
             });
 
+            // 4. Return the outcome gracefully resolving the current request
             match result {
                 Ok((response, _)) => {
                     (StatusCode::OK, Json(ExecuteAgentResponse { response })).into_response()

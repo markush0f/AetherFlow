@@ -7,6 +7,8 @@ use uuid::Uuid;
 pub struct Service;
 
 impl Service {
+    /// Inserts a new task log entry into the database.
+    /// Used by the gateway to permanently trace all AI executions.
     pub async fn log_task(
         db: &DatabaseConnection,
         agent_id: String,
@@ -20,9 +22,10 @@ impl Service {
             prompt: Set(prompt),
             response: Set(response),
             retries: Set(retries),
-            created_at: Set(None), // DB handles default
+            created_at: Set(None), // DB handles default timestamp
         };
 
+        // Persist the log using SeaORM
         AgentLogRepository::create(db, log).await
     }
 }

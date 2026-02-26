@@ -28,6 +28,7 @@ pub struct CreateAgentPayload {
         (status = 500, description = "Internal server error")
     )
 )]
+/// Creates a new Agent in the database, expecting a slug, endpoint and optional source.
 pub async fn create_agent(
     State(state): State<AppState>,
     Json(payload): Json<CreateAgentPayload>,
@@ -48,6 +49,7 @@ pub async fn create_agent(
         (status = 500, description = "Internal server error")
     )
 )]
+/// Retrieves a full list of all available Agents from the SeaORM database.
 pub async fn list_agents(State(state): State<AppState>) -> impl IntoResponse {
     match AgentService::get_all_agents(&state.db).await {
         Ok(agents) => (StatusCode::OK, Json(agents)).into_response(),
@@ -67,6 +69,7 @@ pub async fn list_agents(State(state): State<AppState>) -> impl IntoResponse {
         (status = 500, description = "Internal server error")
     )
 )]
+/// Fetches a specific Agent record directly by its unique UUID.
 pub async fn get_agent(State(state): State<AppState>, Path(id): Path<String>) -> impl IntoResponse {
     match AgentService::get_agent_by_id(&state.db, id).await {
         Ok(Some(agent)) => (StatusCode::OK, Json(agent)).into_response(),

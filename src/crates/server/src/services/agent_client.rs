@@ -3,6 +3,8 @@ use reqwest::Client;
 pub struct Service;
 
 impl Service {
+    /// Executes a given task on a specific remote agent endpoint.
+    /// Implements a Resilience Engineering wrapper holding the complex Backoff mechanism.
     pub async fn execute_task(
         client: &Client,
         endpoint: &str,
@@ -11,6 +13,7 @@ impl Service {
         Self::send_with_retry(client, endpoint, payload).await
     }
 
+    /// Internal helper handling exponential backoff and request isolation.
     async fn send_with_retry(
         client: &Client,
         endpoint: &str,
@@ -35,13 +38,15 @@ impl Service {
                         })?;
                         return Ok((json, attempt as i32));
                     } else if response.status().is_server_error() && attempt < max_retries {
+                        // 5xx internal agent errors, retry up to `max_retries`
                         tracing::warn!(
                             "Agent {} returned 5xx on attempt {}. Retrying...",
                             endpoint,
                             attempt
                         );
                     } else {
-                        // 4xx errors or max retries reached on 5xx
+                        // 4xx errors (client faults) or max retries reached on 5xx
+                        // We abort directly and pass the error info.
                         let status = response.status();
                         let err_body = response
                             .text()
@@ -72,7 +77,8 @@ impl Service {
                 }
             }
 
-            // Exponential backoff
+            // Exponential backoff logic applies a growing delay
+            // before the next attempt, starting from `base_delay`.
             if attempt < max_retries {
                 tokio::time::sleep(base_delay).await;
                 base_delay *= 2;
