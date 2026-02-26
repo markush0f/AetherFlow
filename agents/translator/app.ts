@@ -1,6 +1,6 @@
-const express = require('express');
+import express, { Express, Request, Response, NextFunction } from 'express';
 
-function createApp(routes) {
+export default function createApp(routes: express.Router): Express {
     const app = express();
     app.use(express.json());
 
@@ -8,12 +8,10 @@ function createApp(routes) {
     app.use('/api', routes);
 
     // General Error Handler
-    app.use((err, req, res, next) => {
+    app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
         console.error(err.stack);
         res.status(500).json({ error: 'Something broke!' });
     });
 
     return app;
 }
-
-module.exports = createApp;

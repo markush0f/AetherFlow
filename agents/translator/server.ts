@@ -1,14 +1,14 @@
-const createApp = require('./app');
-const translateRoutes = require('./routes/translateRoutes');
-const summarizeRoutes = require('./routes/summarizeRoutes');
+import createApp from './app';
+import translateRoutes from './routes/translateRoutes';
+import summarizeRoutes from './routes/summarizeRoutes';
 
 // Create the different apps
 const translatorApp = createApp(translateRoutes);
 const summarizerApp = createApp(summarizeRoutes);
 
 // Config ports
-const TRANSLATOR_PORT = 4000;
-const SUMMARIZER_PORT = 4001;
+const TRANSLATOR_PORT = process.env.TRANSLATOR_PORT || 4000;
+const SUMMARIZER_PORT = process.env.SUMMARIZER_PORT || 4001;
 
 // Start Translator
 translatorApp.listen(TRANSLATOR_PORT, () => {

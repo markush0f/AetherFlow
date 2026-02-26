@@ -1,9 +1,9 @@
-const { Ollama } = require('ollama');
+import { Ollama } from 'ollama';
 
 const ollama = new Ollama({ host: 'http://127.0.0.1:11434' });
 
-class SummarizerService {
-    static async summarize(text) {
+export class SummarizerService {
+    static async summarize(text: string): Promise<string> {
         const prompt = `Please provide a concise summary of the following text. Do not include any introductory remarks, just the summary.\n\nText: "${text}"`;
 
         try {
@@ -19,5 +19,3 @@ class SummarizerService {
         }
     }
 }
-
-module.exports = SummarizerService;
