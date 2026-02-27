@@ -6,7 +6,7 @@ export default function AgentGrid() {
     const [statusColor, setStatusColor] = useState('text-yellow-500');
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => { w
+    useEffect(() => {
         let ws;
         let reconnectTimeout;
 
