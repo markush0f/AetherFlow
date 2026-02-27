@@ -1,12 +1,10 @@
-use crate::models::{
-    agent, flow,
-    flow_payloads::{FlowStepWithAgent, FlowWithSteps},
-    flow_step,
-};
+use crate::models::flow::FlowWithSteps;
+use crate::models::flow_step::FlowStepWithAgent;
+use crate::models::{agent, flow, flow_step};
 use crate::repositories::{
     flow::Repository as FlowRepository, flow_step::Repository as FlowStepRepository,
 };
-use sea_orm::{ColumnTrait, DatabaseConnection, DbErr, EntityTrait, QueryFilter, QueryOrder};
+use sea_orm::{ColumnTrait, DatabaseConnection, DbErr, EntityTrait, QueryFilter};
 
 pub struct Service;
 
@@ -17,10 +15,6 @@ impl Service {
         description: Option<String>,
     ) -> Result<flow::Model, DbErr> {
         FlowRepository::create(db, name, description).await
-    }
-
-    pub async fn get_all_flows(db: &DatabaseConnection) -> Result<Vec<flow::Model>, DbErr> {
-        FlowRepository::find_all(db).await
     }
 
     pub async fn get_all_flows_with_steps(

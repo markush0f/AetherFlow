@@ -53,3 +53,17 @@ impl Related<crate::models::agent::Entity> for Entity {
 }
 
 impl ActiveModelBehavior for ActiveModel {}
+
+#[derive(Deserialize, ToSchema)]
+pub struct CreateFlowStepPayload {
+    pub agent_id: String,
+    pub step_order: i32,
+    pub config: Option<serde_json::Value>,
+}
+
+#[derive(Serialize, ToSchema)]
+pub struct FlowStepWithAgent {
+    #[serde(flatten)]
+    pub step: Model,
+    pub agent_slug: String,
+}

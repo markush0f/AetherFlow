@@ -1,3 +1,4 @@
+use crate::models::flow_step::FlowStepWithAgent;
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
@@ -40,3 +41,31 @@ impl Related<crate::models::flow_execution::Entity> for Entity {
 }
 
 impl ActiveModelBehavior for ActiveModel {}
+
+#[derive(Deserialize, ToSchema)]
+pub struct CreateFlowPayload {
+    pub name: String,
+    pub description: Option<String>,
+}
+
+#[derive(Deserialize, ToSchema)]
+pub struct ExecuteFlowPayload {
+    /// Initial payload to send to the first agent in the flow sequence
+    #[schema(value_type = Object)]
+    pub payload: serde_json::Value,
+}
+
+#[derive(Serialize, ToSchema)]
+pub struct ExecuteFlowResponse {
+    /// Final compounded sequence output
+    #[schema(value_type = Object)]
+    pub response: serde_json::Value,
+}
+
+#[derive(Serialize, ToSchema)]
+pub struct FlowWithSteps {
+    #[serde(flatten)]
+    pub flow: Model,
+    pub steps: Vec<FlowStepWithAgent>,
+    pub agents_chain: Vec<String>,
+}
