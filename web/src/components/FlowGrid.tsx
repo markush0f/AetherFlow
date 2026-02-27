@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import FlowEditor from './FlowEditor';
+import { LucideSettings, LucideArrowRight, LucideLink } from './icons';
 
 export default function FlowGrid() {
     const [flows, setFlows] = useState<any[]>([]);
@@ -91,7 +92,7 @@ export default function FlowGrid() {
                         <div className="p-6 grow flex flex-col">
                             <div className="flex items-center gap-3 mb-5">
                                 <div className="bg-indigo-500/10 text-indigo-400 p-2 rounded-lg border border-indigo-500/20">
-                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                                    <LucideLink className="w-5 h-5" />
                                 </div>
                                 <h3 className="text-xl font-bold text-gray-100 tracking-tight">{flow.name}</h3>
                             </div>
@@ -115,7 +116,7 @@ export default function FlowGrid() {
                                                     {slug.replace(/-/g, " ")}
                                                 </span>
                                                 {idx < flow.agents_chain.length - 1 && (
-                                                    <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                                                    <LucideArrowRight className="w-4 h-4 text-gray-600" />
                                                 )}
                                             </div>
                                         ))}
@@ -131,7 +132,7 @@ export default function FlowGrid() {
                                 Trigger Execute
                             </button>
                             <button className="flex-none bg-[#111318] hover:bg-gray-800 text-gray-400 hover:text-white p-2 border border-gray-800 rounded-xl transition-all" title="Manage Config" onClick={(e) => { e.stopPropagation(); setSelectedFlow(flow); }}>
-                                <svg className="w-5 h-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                <LucideSettings className="w-5 h-5 mx-auto" />
                             </button>
                         </div>
                     </div>

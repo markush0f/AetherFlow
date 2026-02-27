@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { LucideAlertCircle, LucideComponent, LucideSettings } from './icons';
 
 export default function AgentGrid() {
     const [agents, setAgents] = useState<any[]>([]);
@@ -72,7 +73,7 @@ export default function AgentGrid() {
         } else if (status === "Unreachable") {
             return (
                 <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/20">
-                    <svg className="w-3 h-3 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <LucideAlertCircle className="w-3 h-3 mr-1.5" />
                     Unreachable
                 </span>
             );
@@ -121,7 +122,7 @@ export default function AgentGrid() {
                                         <div className="bg-gray-800/30 p-3 rounded-xl border border-gray-800/60">
                                             <span className="text-gray-500 text-[10px] uppercase font-bold tracking-wider block mb-1">Source Component</span>
                                             <span className="text-sm text-gray-300 block truncate flex items-center gap-2">
-                                                <svg className="w-3.5 h-3.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                                <LucideComponent className="w-3.5 h-3.5 text-gray-500" />
                                                 {agent.source}
                                             </span>
                                         </div>
@@ -134,7 +135,7 @@ export default function AgentGrid() {
                                     Execute Action
                                 </button>
                                 <button className="flex-none bg-[#111318] hover:bg-gray-800 text-gray-400 hover:text-white p-2 border border-gray-800 rounded-xl transition-all" title="Settings">
-                                    <svg className="w-5 h-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                    <LucideSettings className="w-5 h-5 mx-auto" />
                                 </button>
                             </div>
                         </div>
