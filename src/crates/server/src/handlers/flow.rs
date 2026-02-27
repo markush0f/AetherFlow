@@ -64,12 +64,12 @@ pub async fn create_flow(
     get,
     path = "/",
     responses(
-        (status = 200, description = "List all flows", body = [FlowModel]),
+        (status = 200, description = "List all flows", body = [FlowWithSteps]),
         (status = 500, description = "Internal server error")
     )
 )]
 pub async fn list_flows(State(state): State<AppState>) -> impl IntoResponse {
-    match FlowService::get_all_flows(&state.db).await {
+    match FlowService::get_all_flows_with_steps(&state.db).await {
         Ok(flows) => (StatusCode::OK, Json(flows)).into_response(),
         Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response(),
     }

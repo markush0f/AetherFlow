@@ -58,37 +58,9 @@ import Layout from "../layouts/Layout.astro";
 
   async function fetchFlows() {
     try {
-      const agentsRes = await fetch("http://localhost:8080/agents");
-      const agentsMap = {};
-      if (agentsRes.ok) {
-        const agentsData = await agentsRes.json();
-        agentsData.forEach((a) => (agentsMap[a.id] = a));
-      }
-
       const response = await fetch("http://localhost:8080/flows");
       if (!response.ok) throw new Error("Failed fetching flows");
       const flows = await response.json();
-
-      await Promise.all(
-        flows.map(async (flow) => {
-          try {
-            const stepsRes = await fetch(
-              "http://localhost:8080/flows/" + flow.id + "/steps",
-            );
-            if (stepsRes.ok) {
-              const steps = await stepsRes.json();
-              steps.sort((a, b) => a.step_order - b.step_order);
-              flow.agents_chain = steps.map(
-                (s) => agentsMap[s.agent_id]?.slug || "Unknown Agent",
-              );
-            } else {
-              flow.agents_chain = [];
-            }
-          } catch (e) {
-            flow.agents_chain = [];
-          }
-        }),
-      );
 
       renderFlows(flows);
     } catch (error) {

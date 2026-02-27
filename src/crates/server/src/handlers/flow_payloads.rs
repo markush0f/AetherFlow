@@ -1,3 +1,4 @@
+use crate::models::{flow::Model as FlowModel, flow_step::Model as FlowStepModel};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
@@ -26,4 +27,19 @@ pub struct ExecuteFlowResponse {
     /// Final compounded sequence output
     #[schema(value_type = Object)]
     pub response: serde_json::Value,
+}
+
+#[derive(Serialize, ToSchema)]
+pub struct FlowStepWithAgent {
+    #[serde(flatten)]
+    pub step: FlowStepModel,
+    pub agent_slug: String,
+}
+
+#[derive(Serialize, ToSchema)]
+pub struct FlowWithSteps {
+    #[serde(flatten)]
+    pub flow: FlowModel,
+    pub steps: Vec<FlowStepWithAgent>,
+    pub agents_chain: Vec<String>,
 }

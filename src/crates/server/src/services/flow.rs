@@ -1,8 +1,9 @@
-use crate::models::{flow, flow_step};
+use crate::handlers::flow_payloads::{FlowStepWithAgent, FlowWithSteps};
+use crate::models::{agent, flow, flow_step};
 use crate::repositories::{
     flow::Repository as FlowRepository, flow_step::Repository as FlowStepRepository,
 };
-use sea_orm::{DatabaseConnection, DbErr};
+use sea_orm::{ColumnTrait, DatabaseConnection, DbErr, EntityTrait, QueryFilter, QueryOrder};
 
 pub struct Service;
 
@@ -17,6 +18,53 @@ impl Service {
 
     pub async fn get_all_flows(db: &DatabaseConnection) -> Result<Vec<flow::Model>, DbErr> {
         FlowRepository::find_all(db).await
+    }
+
+    pub async fn get_all_flows_with_steps(
+        db: &DatabaseConnection,
+    ) -> Result<Vec<FlowWithSteps>, DbErr> {
+        let flows = FlowRepository::find_all(db).await?;
+        let flow_ids: Vec<String> = flows.iter().map(|f| f.id.clone()).collect();
+
+        let all_steps = flow_step::Entity::find()
+            .filter(flow_step::Column::FlowId.is_in(flow_ids))
+            .find_also_related(agent::Entity)
+            .all(db)
+            .await?;
+
+        let mut result = Vec::new();
+        for flow in flows {
+            let mut steps_for_flow: Vec<_> = all_steps
+                .iter()
+                .filter(|(step, _)| step.flow_id == flow.id)
+                .cloned()
+                .collect();
+
+            steps_for_flow.sort_by_key(|(step, _)| step.step_order);
+
+            let mut agents_chain = Vec::new();
+            let steps = steps_for_flow
+                .into_iter()
+                .map(|(step, opt_agent)| {
+                    let slug = opt_agent
+                        .map(|a| a.slug)
+                        .unwrap_or_else(|| "Unknown Agent".to_string());
+                    agents_chain.push(slug.clone());
+                    FlowStepWithAgent {
+                        step,
+                        agent_slug: slug,
+                    }
+                })
+                .collect();
+
+            result.push(FlowWithSteps {
+                flow,
+                steps,
+                agents_chain,
+            });
+        }
+
+        Ok(result)
     }
 
     pub async fn get_flow_by_id(
