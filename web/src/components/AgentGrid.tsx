@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 
 export default function AgentGrid() {
-    const [agents, setAgents] = useState([]);
+    const [agents, setAgents] = useState<any[]>([]);
     const [status, setStatus] = useState('Connecting to Gateway...');
     const [statusColor, setStatusColor] = useState('text-yellow-500');
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        let ws;
-        let reconnectTimeout;
+        let ws: WebSocket | null = null;
+        let reconnectTimeout: any;
 
         const connect = () => {
             setStatus('Connecting to Gateway...');
@@ -24,7 +24,7 @@ export default function AgentGrid() {
             ws.onmessage = (event) => {
                 try {
                     const parsedAgents = JSON.parse(event.data);
-                    parsedAgents.sort((a, b) => a.slug.localeCompare(b.slug));
+                    parsedAgents.sort((a: any, b: any) => a.slug.localeCompare(b.slug));
                     setAgents(parsedAgents);
                     setLoading(false);
                 } catch (e) {
@@ -54,7 +54,7 @@ export default function AgentGrid() {
         };
     }, []);
 
-    const renderStatusBadge = (status) => {
+    const renderStatusBadge = (status: string) => {
         if (status === "Ready") {
             return (
                 <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">

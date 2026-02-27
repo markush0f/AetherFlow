@@ -109,7 +109,7 @@ export default function FlowGrid() {
                                 <span className="text-gray-500 text-[10px] uppercase font-bold tracking-wider block mb-3">Agent Sequence</span>
                                 {flow.agents_chain && flow.agents_chain.length > 0 ? (
                                     <div className="flex flex-wrap items-center gap-2">
-                                        {flow.agents_chain.map((slug, idx) => (
+                                        {flow.agents_chain.map((slug: string, idx: number) => (
                                             <div key={idx} className="flex items-center gap-2">
                                                 <span className="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2.5 py-1 rounded text-xs font-semibold tracking-wide capitalize">
                                                     {slug.replace(/-/g, " ")}
