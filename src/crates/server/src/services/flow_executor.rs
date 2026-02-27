@@ -7,7 +7,7 @@ use crate::services::{
     agent_log::Service as AgentLogService,
 };
 use reqwest::Client;
-use sea_orm::{DatabaseConnection, DbErr};
+use sea_orm::DatabaseConnection;
 
 pub struct Service;
 
