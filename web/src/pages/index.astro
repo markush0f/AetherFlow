@@ -1,34 +1,37 @@
 ---
-import Layout from '../layouts/Layout.astro';
+import Layout from "../layouts/Layout.astro";
 ---
 
 <Layout>
   <div class="font-sans">
     <div class="max-w-6xl mx-auto">
-      <header class="mb-12">
-        <div class="inline-flex items-center p-1.5 pr-4 rounded-full bg-white/5 border border-white/10 mb-6 shadow-xl backdrop-blur-md">
-          <span class="w-6 h-6 rounded-full bg-indigo-500 mr-3 flex items-center justify-center">
-            <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-          </span>
-          <span class="text-indigo-300 font-semibold text-xs tracking-widest uppercase">Live Dashboard</span>
-        </div>
-        <h1 class="text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-b from-white via-indigo-100 to-indigo-500/50 mb-6 tracking-tight drop-shadow-sm">AetherFlow Farm</h1>
-        <p class="text-gray-400 text-lg max-w-2xl font-light leading-relaxed">
-            Monitor and command your AI agents in real-time. Nodes are deeply connected via WebSocket layer across the internal gateway.
+      <header class="mb-10">
+        <h1 class="text-4xl font-bold text-white mb-2">Dashboard</h1>
+        <p class="text-gray-400">
+          Monitor and command your AetherFlow agents connected to the Rust
+          Gateway.
         </p>
       </header>
-      
-      <div id="agent-grid" class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+
+      <div
+        id="agent-grid"
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+      >
         <!-- Loader during initial connection -->
-        <div class="col-span-full flex justify-center py-32 rounded-3xl bg-white/5 border border-white/5 backdrop-blur-3xl shadow-2xl">
+        <div
+          class="col-span-full flex justify-center py-20 bg-[#1e2124] rounded-lg border border-gray-700/50 shadow-sm"
+        >
           <div class="animate-pulse flex flex-col items-center">
-            <div class="w-16 h-16 border-[5px] border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin mb-6 shadow-[0_0_30px_rgba(99,102,241,0.5)]"></div>
-            <p class="text-gray-400 font-medium tracking-wide">Syncing Quantum States...</p>
+            <div
+              class="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"
+            >
+            </div>
+            <p class="text-gray-400 text-sm">Connecting to WebSockets...</p>
           </div>
         </div>
       </div>
-      
-      <div id="connection-status" class="mt-16 text-center text-sm font-medium">
+
+      <div id="connection-status" class="mt-8 text-center text-sm">
         <!-- Status dynamically injected -->
       </div>
     </div>
@@ -36,44 +39,43 @@ import Layout from '../layouts/Layout.astro';
 </Layout>
 
 <script>
-  const grid = document.getElementById('agent-grid');
-  const statusEl = document.getElementById('connection-status');
-  
+  const grid = document.getElementById("agent-grid");
+  const statusEl = document.getElementById("connection-status");
+
   // Create beautiful UI badges based on the agent's actual status
   function getStatusBadge(status) {
-    if (status === 'Ready') {
+    if (status === "Ready") {
       return `
-        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-500/10 text-green-400 border border-green-500/20 shadow-[0_0_10px_rgba(34,197,94,0.2)]">
-          <span class="w-1.5 h-1.5 mr-2 bg-green-500 rounded-full animate-pulse"></span>
+        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-500/20 text-green-400">
           Ready
         </span>
       `;
-    } else if (status === 'Pending') {
+    } else if (status === "Pending") {
       return `
-        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-yellow-500/10 text-yellow-500 border border-yellow-500/20">
-          <span class="w-1.5 h-1.5 mr-2 bg-yellow-500 rounded-full"></span>
+        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-500/20 text-yellow-400">
           Pending
         </span>
       `;
-    } else if (status === 'Unreachable') {
+    } else if (status === "Unreachable") {
       return `
-        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-500/10 text-red-500 border border-red-500/20 shadow-[0_0_10px_rgba(239,68,68,0.2)]">
-          <svg class="w-3 h-3 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-500/20 text-red-400">
           Unreachable
         </span>
       `;
     } else {
-      return `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gray-500/10 text-gray-400 border border-gray-500/20">${status}</span>`;
+      return `
+        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-500/20 text-gray-400">${status}</span>
+      `;
     }
   }
 
   // Draw the agent cards using Tailwind for rich aesthetics
   function renderAgents(agents) {
     if (!grid) return;
-    
+
     // Sort agents by slug to keep the interface orderly
     agents.sort((a, b) => a.slug.localeCompare(b.slug));
-    
+
     if (agents.length === 0) {
       grid.innerHTML = `
         <div class="col-span-full py-12 text-center bg-gray-800/50 rounded-2xl border border-gray-700 border-dashed">
@@ -83,65 +85,80 @@ import Layout from '../layouts/Layout.astro';
       return;
     }
 
-    grid.innerHTML = agents.map(agent => `
-      <div class="bg-gray-800/80 backdrop-blur-xl rounded-2xl border border-gray-700 shadow-xl overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:border-indigo-500/50 hover:shadow-indigo-500/10 group flex flex-col h-full relative">
-        <!-- Glow effect behind -->
-        <div class="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-        
-        <div class="p-6 flex-grow relative z-10">
-          <div class="flex justify-between items-start mb-6">
-            <h3 class="text-2xl font-bold text-gray-100 group-hover:text-indigo-300 transition-colors capitalize tracking-tight">${agent.slug.replace('-', ' ')}</h3>
+    grid.innerHTML = agents
+      .map(
+        (agent) => `
+      <div class="bg-[#1e2124] rounded-lg border border-gray-700/80 shadow-sm hover:border-gray-600 transition-colors flex flex-col h-full">
+        <div class="p-5 flex-grow">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-bold text-white capitalize">${agent.slug.replace(
+              "-",
+              " ",
+            )}</h3>
             ${getStatusBadge(agent.status)}
           </div>
           
-          <div class="space-y-4">
-            <div class="bg-gray-900/50 p-3 rounded-lg border border-gray-700/50">
-              <span class="text-gray-500 text-xs uppercase tracking-wider block mb-1 font-semibold">Agent UUID</span>
-              <span class="font-mono text-sm text-gray-400 truncate block opacity-80">${agent.id}</span>
+          <div class="space-y-3">
+            <div>
+              <span class="text-gray-500 text-xs font-medium block mb-0.5">UUID</span>
+              <span class="font-mono text-xs text-gray-400 block truncate">${
+                agent.id
+              }</span>
             </div>
             
             <div>
-              <span class="text-gray-500 text-xs uppercase tracking-wider block mb-1 font-semibold">Webhook Target</span>
-              <span class="text-indigo-400 hover:text-indigo-300 transition-colors truncate block text-sm bg-indigo-500/5 px-3 py-2 rounded-lg border border-indigo-500/10">${agent.endpoint}</span>
+              <span class="text-gray-500 text-xs font-medium block mb-0.5">Target</span>
+              <span class="text-blue-400 block text-sm truncate">${
+                agent.endpoint
+              }</span>
             </div>
             
-            ${agent.source ? `
+            ${
+              agent.source
+                ? `
             <div>
-              <span class="text-gray-500 text-xs uppercase tracking-wider block mb-1 font-semibold">Source Path</span>
-              <span class="flex items-center text-sm text-gray-300 bg-gray-900/30 px-3 py-2 rounded-lg">
-                <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+              <span class="text-gray-500 text-xs font-medium block mb-0.5">Source</span>
+              <span class="text-sm text-gray-300 block truncate">
                 ${agent.source}
               </span>
             </div>
-            ` : ''}
+            `
+                : ""
+            }
           </div>
         </div>
         
-        <div class="mt-auto px-6 py-4 border-t border-gray-700/80 bg-gray-900/60 relative z-10 flex gap-2">
-           <button class="flex-1 bg-gray-800 hover:bg-indigo-600 text-gray-300 hover:text-white font-medium py-2 px-4 rounded-lg transition-all duration-300 border border-gray-700 hover:border-indigo-500 text-sm shadow-sm" onclick="alert('Execute task on ${agent.slug}')">
-             Execute Task
+        <div class="px-5 py-3 border-t border-gray-700/80 bg-black/20 mt-auto flex gap-2">
+           <button class="flex-1 bg-white hover:bg-gray-200 text-black font-medium py-1.5 px-3 rounded text-sm transition-colors" onclick="alert('Execute task on ${
+             agent.slug
+           }')">
+             Execute
            </button>
-           <button class="flex-none bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-gray-200 p-2 rounded-lg transition-all border border-gray-700" title="Manage Settings">
-             <svg class="w-5 h-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+           <button class="flex-none bg-gray-700 hover:bg-gray-600 text-white p-1.5 rounded transition-colors" title="Settings">
+             <svg class="w-4 h-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
            </button>
         </div>
       </div>
-    `).join('');
+    `,
+      )
+      .join("");
   }
 
   function connect() {
     if (statusEl) {
-       statusEl.innerHTML = '<span class="text-yellow-500/80 tracking-wide flex items-center justify-center"><svg class="animate-spin -ml-1 mr-3 h-4 w-4 text-yellow-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Connecting to Gateway Socket...</span>';
+      statusEl.innerHTML =
+        '<span class="text-yellow-500">Connecting to Gateway...</span>';
     }
-    
-    const ws = new WebSocket('ws://localhost:8080/ws');
-    
+
+    const ws = new WebSocket("ws://localhost:8080/ws");
+
     ws.onopen = () => {
       if (statusEl) {
-         statusEl.innerHTML = '<span class="text-green-400 bg-green-500/10 px-4 py-1.5 rounded-full border border-green-500/20 shadow-sm flex items-center justify-center w-max mx-auto"><span class="w-2 h-2 mr-2 bg-green-400 rounded-full animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.8)]"></span> Streaming live from AetherFlow Gateway</span>';
+        statusEl.innerHTML =
+          '<span class="text-green-500">Connected to AetherFlow WebSocket Endpoint</span>';
       }
     };
-    
+
     ws.onmessage = (event) => {
       try {
         const agents = JSON.parse(event.data);
@@ -150,20 +167,21 @@ import Layout from '../layouts/Layout.astro';
         console.error("Failed to parse agents JSON", e);
       }
     };
-    
+
     ws.onclose = () => {
       if (statusEl) {
-         statusEl.innerHTML = '<span class="text-red-400 bg-red-500/10 px-4 py-1.5 rounded-full border border-red-500/20 flex items-center justify-center w-max mx-auto"><span class="w-2 h-2 mr-2 bg-red-400 rounded-full"></span> Connection lost. Reconnecting in 3s...</span>';
+        statusEl.innerHTML =
+          '<span class="text-red-500">Connection lost. Reconnecting...</span>';
       }
       setTimeout(connect, 3000);
     };
-    
+
     ws.onerror = (err) => {
-      console.error('WebSocket error:', err);
+      console.error("WebSocket error:", err);
     };
   }
 
   // Start the heartbeat connection
   // Ensure script only runs on the client by waiting for DOM
-  document.addEventListener('DOMContentLoaded', connect);
+  document.addEventListener("DOMContentLoaded", connect);
 </script>

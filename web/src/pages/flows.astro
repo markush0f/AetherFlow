@@ -1,5 +1,5 @@
 ---
-import Layout from '../layouts/Layout.astro';
+import Layout from "../layouts/Layout.astro";
 ---
 
 <Layout>
@@ -7,127 +7,143 @@ import Layout from '../layouts/Layout.astro';
     <div class="max-w-6xl mx-auto">
       <header class="mb-12 flex justify-between items-end">
         <div>
-            <div class="inline-flex items-center p-1.5 pr-4 rounded-full bg-white/5 border border-white/10 mb-6 shadow-xl backdrop-blur-md">
-            <span class="w-6 h-6 rounded-full bg-purple-500 mr-3 flex items-center justify-center">
-                <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-            </span>
-            <span class="text-purple-300 font-semibold text-xs tracking-widest uppercase">Pipelines</span>
-            </div>
-            <h1 class="text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-b from-white via-indigo-100 to-indigo-500/50 mb-4 tracking-tight drop-shadow-sm">Flow Sequences</h1>
-            <p class="text-gray-400 text-lg max-w-2xl font-light leading-relaxed">
-                Chain logic across multiple agents. Execute automated pipelines seamlessly.
-            </p>
+          <h1 class="text-4xl font-bold text-white mb-2">Automations</h1>
+          <p class="text-gray-400 text-lg max-w-2xl">
+            Create linear sequences pointing across remote agents to compose
+            complex features.
+          </p>
         </div>
-        <button class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-3 px-6 rounded-2xl shadow-[0_0_20px_rgba(79,70,229,0.4)] transition-all duration-300 hover:scale-105 active:scale-95 flex items-center">
-            <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-            New Flow
+        <button
+          class="bg-blue-600 hover:bg-blue-500 text-white font-medium py-2 px-4 rounded transition-colors flex items-center text-sm"
+        >
+          <svg
+            class="w-4 h-4 mr-2"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 4v16m8-8H4"></path>
+          </svg>
+          New Flow
         </button>
       </header>
-      
-      <div id="flows-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+      <div
+        id="flows-grid"
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+      >
         <!-- Loader during initial fetch -->
-        <div class="col-span-full flex justify-center py-32 rounded-3xl bg-white/5 border border-white/5 backdrop-blur-3xl shadow-2xl">
+        <div
+          class="col-span-full flex justify-center py-20 rounded-lg bg-[#1e2124] border border-gray-700/50"
+        >
           <div class="animate-pulse flex flex-col items-center">
-            <div class="w-16 h-16 border-[5px] border-purple-500/30 border-t-purple-500 rounded-full animate-spin mb-6 shadow-[0_0_30px_rgba(168,85,247,0.5)]"></div>
-            <p class="text-gray-400 font-medium tracking-wide">Fetching registered flows...</p>
+            <div
+              class="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"
+            >
+            </div>
+            <p class="text-gray-400 text-sm">Loading data from postgres...</p>
           </div>
         </div>
       </div>
-      
     </div>
   </div>
 </Layout>
 
 <script>
-  const grid = document.getElementById('flows-grid');
-  
+  const grid = document.getElementById("flows-grid");
+
   async function fetchFlows() {
     try {
-        const response = await fetch('http://localhost:8080/flows');
-        if (!response.ok) throw new Error("Failed fetching flows");
-        const flows = await response.json();
-        
-        renderFlows(flows);
+      const response = await fetch("http://localhost:8080/flows");
+      if (!response.ok) throw new Error("Failed fetching flows");
+      const flows = await response.json();
+
+      renderFlows(flows);
     } catch (error) {
-        console.error("Error API:", error);
-        if (grid) {
-            grid.innerHTML = `
+      console.error("Error API:", error);
+      if (grid) {
+        grid.innerHTML = `
                 <div class="col-span-full py-12 text-center bg-red-900/10 rounded-3xl border border-red-500/20 backdrop-blur-md">
                     <p class="text-red-400">Failed to fetch flows from backend. Is the server running?</p>
                 </div>
             `;
-        }
+      }
     }
   }
 
   function renderFlows(flows) {
     if (!grid) return;
-    
+
     if (flows.length === 0) {
       grid.innerHTML = `
-        <div class="col-span-full py-16 text-center bg-white/5 rounded-3xl border border-white/10 backdrop-blur-md border-dashed">
-          <svg class="w-16 h-16 mx-auto mb-6 text-gray-500/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-          </svg>
-          <h3 class="text-xl font-medium text-gray-300 mb-2">No pipelines active</h3>
-          <p class="text-gray-500">Create your first flow sequence to automate tasks.</p>
+        <div class="col-span-full py-12 text-center bg-[#1e2124] rounded-lg border border-gray-700 border-dashed">
+          <p class="text-gray-400">No pipelines active</p>
         </div>
       `;
       return;
     }
 
-    grid.innerHTML = flows.map(flow => `
-      <div class="bg-gray-800/40 backdrop-blur-2xl rounded-3xl border border-gray-700/50 shadow-xl overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:border-purple-500/40 hover:shadow-[0_10px_40px_-10px_rgba(168,85,247,0.2)] group flex flex-col h-full relative p-8">
-        <!-- Glow effect behind -->
-        <div class="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-        
-        <div class="relative z-10 flex-grow">
-          <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-gray-800 to-gray-700 border border-gray-600 flex items-center justify-center mb-6 shadow-inner text-gray-400 group-hover:text-purple-400 group-hover:border-purple-500/30 transition-colors">
-            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-          </div>
-          <h3 class="text-2xl font-bold text-gray-100 group-hover:text-white transition-colors tracking-tight mb-3">${flow.name}</h3>
+    grid.innerHTML = flows
+      .map(
+        (flow) => `
+      <div class="bg-[#1e2124] rounded-lg border border-gray-700/80 shadow-sm hover:border-gray-600 flex flex-col h-full transition-colors">
+        <div class="p-6 flex-grow">
+          <h3 class="text-xl font-bold text-white mb-2">${flow.name}</h3>
           
-          <p class="text-gray-400 text-sm leading-relaxed mb-6 font-light">
-             ${flow.description || 'No description provided.'}
+          <p class="text-gray-400 text-sm mb-4">
+             ${flow.description || "No description provided."}
           </p>
           
-          <div class="text-xs font-mono text-gray-500 bg-black/20 p-3 rounded-xl border border-white/5 break-all">
-             ${flow.id}
+          <div class="text-xs font-mono text-gray-500 truncate block">
+             ID: ${flow.id}
           </div>
         </div>
         
-        <div class="mt-8 pt-6 border-t border-white/5 relative z-10 flex gap-3">
-           <button class="flex-1 bg-white/5 hover:bg-purple-600 text-gray-300 hover:text-white font-medium py-2.5 px-4 rounded-xl transition-all duration-300 border border-white/10 hover:border-transparent text-sm shadow-[0_0_15px_transparent] hover:shadow-[0_0_20px_rgba(147,51,234,0.4)]" onclick="executeFlow('${flow.id}')">
-             Trigger Execution
+        <div class="px-6 py-4 border-t border-gray-700/80 bg-black/20 mt-auto flex gap-2">
+           <button class="flex-1 bg-white hover:bg-gray-200 text-black font-medium py-1.5 px-3 rounded text-sm transition-colors" onclick="window.executeFlow('${
+             flow.id
+           }')">
+             Execute
            </button>
-           <button class="flex-none bg-white/5 hover:bg-white/10 text-gray-400 hover:text-gray-200 p-2.5 rounded-xl border border-white/10 transition-all font-medium text-sm flex items-center gap-2" title="Edit Sequence">
-             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
-             Steps
+           <button class="flex-none bg-gray-700 hover:bg-gray-600 text-white p-1.5 rounded transition-colors" title="Flow Options">
+             <svg class="w-4 h-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
            </button>
         </div>
       </div>
-    `).join('');
+    `,
+      )
+      .join("");
   }
 
-  window.executeFlow = async function(id) {
-    if(!confirm("Are you sure you want to trigger this execution with an empty initial payload?")) return;
+  window.executeFlow = async function (id) {
+    if (
+      !confirm(
+        "Are you sure you want to trigger this execution with an empty initial payload?",
+      )
+    )
+      return;
     try {
-        const response = await fetch(`http://localhost:8080/flows/${id}/execute`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ payload: {} })
-        });
-        const result = await response.json();
-        alert("Flow executed! Final result: \n" + JSON.stringify(result, null, 2));
+      const response = await fetch(
+        `http://localhost:8080/flows/${id}/execute`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ payload: {} }),
+        },
+      );
+      const result = await response.json();
+      alert(
+        "Flow executed! Final result: \n" + JSON.stringify(result, null, 2),
+      );
     } catch (error) {
-        alert("Execution failed! See console.");
-        console.error(error);
+      alert("Execution failed! See console.");
+      console.error(error);
     }
-  }
+  };
 
-  document.addEventListener('DOMContentLoaded', fetchFlows);
+  document.addEventListener("DOMContentLoaded", fetchFlows);
 </script>
