@@ -11,7 +11,7 @@ import ReactFlow, {
     BackgroundVariant
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import { Bot, Play, X, Zap } from 'lucide-react';
+import { LucideBot as Bot, LucidePlay as Play, LucideX as X, LucideZap as Zap } from './icons';
 
 const AgentNode = ({ data }: any) => {
     return (
