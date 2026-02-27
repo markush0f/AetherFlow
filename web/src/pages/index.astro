@@ -3,27 +3,32 @@ import Layout from '../layouts/Layout.astro';
 ---
 
 <Layout>
-  <div class="min-h-screen bg-gray-900 text-gray-100 p-8 font-sans">
+  <div class="font-sans">
     <div class="max-w-6xl mx-auto">
-      <header class="mb-12 text-center">
-        <div class="inline-block p-2 px-4 rounded-full bg-blue-500/10 border border-blue-500/20 mb-4">
-          <span class="text-blue-400 font-medium text-sm tracking-widest uppercase">Live Dashboard</span>
+      <header class="mb-12">
+        <div class="inline-flex items-center p-1.5 pr-4 rounded-full bg-white/5 border border-white/10 mb-6 shadow-xl backdrop-blur-md">
+          <span class="w-6 h-6 rounded-full bg-indigo-500 mr-3 flex items-center justify-center">
+            <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+          </span>
+          <span class="text-indigo-300 font-semibold text-xs tracking-widest uppercase">Live Dashboard</span>
         </div>
-        <h1 class="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-500 mb-4 tracking-tight">AetherFlow Agent Farm</h1>
-        <p class="text-gray-400 text-lg max-w-2xl mx-auto">Monitor your AI agents in real-time. Connected to the Rust Gateway to receive instant updates over WebSocket.</p>
+        <h1 class="text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-b from-white via-indigo-100 to-indigo-500/50 mb-6 tracking-tight drop-shadow-sm">AetherFlow Farm</h1>
+        <p class="text-gray-400 text-lg max-w-2xl font-light leading-relaxed">
+            Monitor and command your AI agents in real-time. Nodes are deeply connected via WebSocket layer across the internal gateway.
+        </p>
       </header>
       
-      <div id="agent-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div id="agent-grid" class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
         <!-- Loader during initial connection -->
-        <div class="col-span-1 md:col-span-2 lg:col-span-3 flex justify-center py-20">
+        <div class="col-span-full flex justify-center py-32 rounded-3xl bg-white/5 border border-white/5 backdrop-blur-3xl shadow-2xl">
           <div class="animate-pulse flex flex-col items-center">
-            <div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-            <p class="text-gray-500">Listening to Gateway...</p>
+            <div class="w-16 h-16 border-[5px] border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin mb-6 shadow-[0_0_30px_rgba(99,102,241,0.5)]"></div>
+            <p class="text-gray-400 font-medium tracking-wide">Syncing Quantum States...</p>
           </div>
         </div>
       </div>
       
-      <div id="connection-status" class="mt-12 text-center text-sm font-medium">
+      <div id="connection-status" class="mt-16 text-center text-sm font-medium">
         <!-- Status dynamically injected -->
       </div>
     </div>
