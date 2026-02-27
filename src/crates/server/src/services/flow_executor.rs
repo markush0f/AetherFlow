@@ -64,16 +64,76 @@ impl Service {
                 }
             };
 
-            // Prepare payload mixing previous agent output with step static config if set
+            // Prepare payload by dynamically acting as a template engine
             let mut payload = current_data.clone();
+
             if let Some(config) = step.config {
-                // If both are objects, merge them. If not, just use current_data. Simple heuristic.
-                if let (Some(payload_obj), Some(config_obj)) =
-                    (payload.as_object_mut(), config.as_object())
-                {
-                    for (k, v) in config_obj {
-                        payload_obj.insert(k.clone(), v.clone());
+                if let Some(config_obj) = config.as_object() {
+                    let mut new_payload = serde_json::Map::new();
+
+                    // Extract a clean string representation of the current data (e.g. previous step output)
+                    let input_str = match &current_data {
+                        serde_json::Value::String(s) => s.clone(),
+                        serde_json::Value::Object(obj) => {
+                            if let Some(content) = obj.get("response").and_then(|v| v.as_str()) {
+                                content.to_string()
+                            } else if let Some(content) = obj
+                                .get("message")
+                                .and_then(|v| v.get("content"))
+                                .and_then(|v| v.as_str())
+                            {
+                                content.to_string()
+                            } else {
+                                current_data.to_string()
+                            }
+                        }
+                        v => v.to_string(),
+                    };
+
+                    // 1. Template Interpolation
+                    if let Some(template_val) = config_obj.get("template").and_then(|v| v.as_str())
+                    {
+                        let interpolated = template_val.replace("{{input}}", &input_str);
+                        new_payload.insert("prompt".to_string(), serde_json::json!(interpolated));
+                    } else if let Some(prompt_val) =
+                        config_obj.get("prompt").and_then(|v| v.as_str())
+                    {
+                        // Fallback: If there's a prompt, also try to interpolate it
+                        let interpolated = prompt_val.replace("{{input}}", &input_str);
+                        new_payload.insert("prompt".to_string(), serde_json::json!(interpolated));
+                    } else {
+                        // If no template, inject current_data as raw format
+                        new_payload.insert("prompt".to_string(), serde_json::json!(input_str));
                     }
+
+                    // 2. Extract control parameters and map them for Ollama payload construction
+                    if let Some(system_prompt) = config_obj.get("system_prompt") {
+                        new_payload.insert("system".to_string(), system_prompt.clone());
+                    }
+                    if let Some(temperature) = config_obj.get("temperature") {
+                        // Put inside options for standard Ollama? Or root? We'll put root, standard Ollama API accepts temperature at root
+                        new_payload.insert("temperature".to_string(), temperature.clone());
+                    }
+                    if let Some(model) = config_obj.get("model") {
+                        new_payload.insert("model".to_string(), model.clone());
+                    }
+
+                    // 3. Keep moving existing objects if they are not the mapped ones
+                    for (k, v) in config_obj {
+                        if k != "template"
+                            && k != "prompt"
+                            && k != "system_prompt"
+                            && k != "temperature"
+                            && k != "model"
+                        {
+                            new_payload.insert(k.clone(), v.clone());
+                        }
+                    }
+
+                    // Only map stream: false to avoid streaming chunks response parsing
+                    new_payload.insert("stream".to_string(), serde_json::json!(false));
+
+                    payload = serde_json::Value::Object(new_payload);
                 }
             }
 
