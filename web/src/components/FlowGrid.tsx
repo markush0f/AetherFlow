@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import FlowEditor from './FlowEditor';
-import { LucideSettings, LucideArrowRight, LucideLink } from './icons';
+import { CreateFlowDialog } from './CreateFlowDialog';
+import { LucideSettings, LucideArrowRight, LucideLink, LucidePlus } from './icons';
 
 export default function FlowGrid() {
     const [flows, setFlows] = useState<any[]>([]);
@@ -8,21 +9,24 @@ export default function FlowGrid() {
     const [error, setError] = useState<string | null>(null);
     const [selectedFlow, setSelectedFlow] = useState<any>(null);
 
-    useEffect(() => {
-        async function fetchFlows() {
-            try {
-                const response = await fetch("http://localhost:8080/flows");
-                if (!response.ok) throw new Error("Failed fetching flows");
-                const data = await response.json();
-                setFlows(data);
-            } catch (err) {
-                console.error("Error API:", err);
-                setError("Failed to fetch flows from backend. Is the server running?");
-            } finally {
-                setLoading(false);
-            }
-        }
+    const [showCreateDialog, setShowCreateDialog] = useState(false);
 
+    const fetchFlows = async () => {
+        setLoading(true);
+        try {
+            const response = await fetch("http://localhost:8080/flows");
+            if (!response.ok) throw new Error("Failed fetching flows");
+            const data = await response.json();
+            setFlows(data);
+        } catch (err) {
+            console.error("Error API:", err);
+            setError("Failed to fetch flows from backend. Is the server running?");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
         fetchFlows();
     }, []);
 
@@ -82,6 +86,23 @@ export default function FlowGrid() {
             {selectedFlow && (
                 <FlowEditor flow={selectedFlow} onBack={() => setSelectedFlow(null)} />
             )}
+            {showCreateDialog && (
+                <CreateFlowDialog
+                    onClose={() => setShowCreateDialog(false)}
+                    onSuccess={() => { setShowCreateDialog(false); fetchFlows(); }}
+                />
+            )}
+
+            <div className="flex justify-end mb-6">
+                <button
+                    onClick={() => setShowCreateDialog(true)}
+                    className="bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2 px-5 rounded-lg transition-all flex items-center gap-2 text-sm shadow-[0_0_15px_rgba(79,70,229,0.3)] hover:shadow-[0_0_20px_rgba(79,70,229,0.5)] active:scale-95 border border-indigo-400/20"
+                >
+                    <LucidePlus className="w-4 h-4" />
+                    Create New Flow
+                </button>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {flows.map((flow) => (
                     <div
