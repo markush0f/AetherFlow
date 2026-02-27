@@ -21,9 +21,11 @@ pub mod state;
     components(
         schemas(
             models::agent::Model, models::agent::AgentStatus,
+            models::flow::Model, models::flow_step::Model,
             handlers::agent::CreateAgentPayload,
             handlers::gateway::ExecuteAgentPayload, handlers::gateway::ExecuteAgentResponse,
-            handlers::flow::ExecuteFlowPayload, handlers::flow::ExecuteFlowResponse
+            handlers::flow::ExecuteFlowPayload, handlers::flow::ExecuteFlowResponse,
+            handlers::flow::CreateFlowPayload, handlers::flow::CreateFlowStepPayload
         )
     ),
     tags(

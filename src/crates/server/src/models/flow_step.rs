@@ -1,7 +1,8 @@
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize, ToSchema)]
 #[sea_orm(table_name = "flow_steps")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
@@ -15,6 +16,7 @@ pub struct Model {
 
     pub config: Option<serde_json::Value>,
 
+    #[schema(value_type = Option<String>)]
     pub created_at: Option<DateTimeWithTimeZone>,
 }
 
