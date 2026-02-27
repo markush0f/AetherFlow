@@ -46,25 +46,28 @@ import Layout from "../layouts/Layout.astro";
   function getStatusBadge(status) {
     if (status === "Ready") {
       return `
-        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-500/20 text-green-400">
+        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-2 animate-pulse"></span>
           Ready
         </span>
       `;
     } else if (status === "Pending") {
       return `
-        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-500/20 text-yellow-400">
+        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-amber-500/10 text-amber-500 border border-amber-500/20">
+          <span class="w-1.5 h-1.5 rounded-full bg-amber-500 mr-2"></span>
           Pending
         </span>
       `;
     } else if (status === "Unreachable") {
       return `
-        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-500/20 text-red-400">
+        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/20">
+          <svg class="w-3 h-3 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
           Unreachable
         </span>
       `;
     } else {
       return `
-        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-500/20 text-gray-400">${status}</span>
+        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-gray-500/10 text-gray-400 border border-gray-500/20">${status}</span>
       `;
     }
   }
@@ -73,7 +76,6 @@ import Layout from "../layouts/Layout.astro";
   function renderAgents(agents) {
     if (!grid) return;
 
-    // Sort agents by slug to keep the interface orderly
     agents.sort((a, b) => a.slug.localeCompare(b.slug));
 
     if (agents.length === 0) {
@@ -88,27 +90,27 @@ import Layout from "../layouts/Layout.astro";
     grid.innerHTML = agents
       .map(
         (agent) => `
-      <div class="bg-[#1e2124] rounded-lg border border-gray-700/80 shadow-sm hover:border-gray-600 transition-colors flex flex-col h-full">
-        <div class="p-5 flex-grow">
-          <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-bold text-white capitalize">${agent.slug.replace(
+      <div class="bg-[#111318] border border-gray-800 rounded-2xl shadow-sm hover:border-indigo-500/40 hover:shadow-[0_4px_20px_-4px_rgba(99,102,241,0.1)] transition-all duration-300 flex flex-col h-full overflow-hidden">
+        <div class="p-6 flex-grow">
+          <div class="flex justify-between items-center mb-5">
+            <h3 class="text-xl font-bold text-gray-100 capitalize tracking-tight">${agent.slug.replace(
               "-",
               " ",
             )}</h3>
             ${getStatusBadge(agent.status)}
           </div>
           
-          <div class="space-y-3">
-            <div>
-              <span class="text-gray-500 text-xs font-medium block mb-0.5">UUID</span>
-              <span class="font-mono text-xs text-gray-400 block truncate">${
+          <div class="space-y-4">
+            <div class="bg-gray-800/30 p-3 rounded-xl border border-gray-800/60">
+              <span class="text-gray-500 text-[10px] uppercase font-bold tracking-wider block mb-1">UUID</span>
+              <span class="font-mono text-xs text-gray-300 block truncate">${
                 agent.id
               }</span>
             </div>
             
-            <div>
-              <span class="text-gray-500 text-xs font-medium block mb-0.5">Target</span>
-              <span class="text-blue-400 block text-sm truncate">${
+            <div class="bg-gray-800/30 p-3 rounded-xl border border-gray-800/60">
+              <span class="text-gray-500 text-[10px] uppercase font-bold tracking-wider block mb-1">Target</span>
+              <span class="text-indigo-400 block text-sm truncate">${
                 agent.endpoint
               }</span>
             </div>
@@ -116,9 +118,10 @@ import Layout from "../layouts/Layout.astro";
             ${
               agent.source
                 ? `
-            <div>
-              <span class="text-gray-500 text-xs font-medium block mb-0.5">Source</span>
-              <span class="text-sm text-gray-300 block truncate">
+            <div class="bg-gray-800/30 p-3 rounded-xl border border-gray-800/60">
+              <span class="text-gray-500 text-[10px] uppercase font-bold tracking-wider block mb-1">Source Component</span>
+              <span class="text-sm text-gray-300 block truncate flex items-center gap-2">
+                <svg class="w-3.5 h-3.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                 ${agent.source}
               </span>
             </div>
@@ -128,14 +131,14 @@ import Layout from "../layouts/Layout.astro";
           </div>
         </div>
         
-        <div class="px-5 py-3 border-t border-gray-700/80 bg-black/20 mt-auto flex gap-2">
-           <button class="flex-1 bg-white hover:bg-gray-200 text-black font-medium py-1.5 px-3 rounded text-sm transition-colors" onclick="alert('Execute task on ${
+        <div class="px-6 py-4 bg-gray-900/50 border-t border-gray-800 mt-auto flex gap-3">
+           <button class="flex-1 bg-white hover:bg-gray-200 text-gray-900 font-semibold py-2 px-4 rounded-xl text-sm transition-all shadow-sm active:scale-[0.98]" onclick="alert('Execute task on ${
              agent.slug
            }')">
-             Execute
+             Execute Action
            </button>
-           <button class="flex-none bg-gray-700 hover:bg-gray-600 text-white p-1.5 rounded transition-colors" title="Settings">
-             <svg class="w-4 h-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+           <button class="flex-none bg-[#111318] hover:bg-gray-800 text-gray-400 hover:text-white p-2 border border-gray-800 rounded-xl transition-all" title="Settings">
+             <svg class="w-5 h-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
            </button>
         </div>
       </div>
