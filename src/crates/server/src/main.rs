@@ -24,8 +24,8 @@ pub mod state;
             models::flow::Model, models::flow_step::Model,
             handlers::agent::CreateAgentPayload,
             handlers::gateway::ExecuteAgentPayload, handlers::gateway::ExecuteAgentResponse,
-            handlers::flow::ExecuteFlowPayload, handlers::flow::ExecuteFlowResponse,
-            handlers::flow::CreateFlowPayload, handlers::flow::CreateFlowStepPayload
+            handlers::flow_payloads::ExecuteFlowPayload, handlers::flow_payloads::ExecuteFlowResponse,
+            handlers::flow_payloads::CreateFlowPayload, handlers::flow_payloads::CreateFlowStepPayload
         )
     ),
     tags(
