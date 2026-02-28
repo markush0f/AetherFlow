@@ -9,10 +9,12 @@ use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
 mod handlers;
+mod integrations;
 mod models;
 mod repositories;
 mod routes;
 mod services;
+
 pub mod state;
 
 // Base OpenAPI documentation
