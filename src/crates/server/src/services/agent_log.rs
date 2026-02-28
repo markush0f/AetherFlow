@@ -9,7 +9,7 @@ pub struct Service;
 impl Service {
     /// Inserts a new task log entry into the database.
     /// Used by the gateway to permanently trace all AI executions.
-    pub async fn log_task(
+    pub async fn create(
         db: &DatabaseConnection,
         agent_id: String,
         prompt: serde_json::Value,

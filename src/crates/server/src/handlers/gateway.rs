@@ -63,7 +63,7 @@ pub async fn execute_agent_task(
             let agent_id_log = agent.id.clone();
             let payload_log = payload.payload.clone();
             tokio::spawn(async move {
-                let _ = crate::services::agent_log::Service::log_task(
+                let _ = crate::services::agent_log::Service::create(
                     &ping_db,
                     agent_id_log,
                     payload_log,

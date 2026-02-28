@@ -36,7 +36,7 @@ const AgentNode = ({ data }: any) => {
                             <div className="text-[9px] text-indigo-500 font-mono tracking-widest uppercase">Seq_0{data.stepOrder}</div>
                             <Zap size={10} className="text-purple-500 opacity-50" />
                         </div>
-                        <div className="text-sm text-gray-100 font-semibold tracking-wide uppercase">{data.agentSlug.replace(/-/g, ' ')}</div>
+                        <div className="text-sm text-gray-100 font-semibold tracking-wide uppercase">{data.taskName}</div>
                     </div>
                 </div>
 
@@ -58,7 +58,7 @@ export default function FlowEditor({ flow, onBack }: { flow: any, onBack: any })
             id: step.id,
             type: 'agentNode',
             position: { x: idx * 400 + 100, y: Math.max(window.innerHeight / 2 - 100, 100) },
-            data: { agentSlug: step.agent_slug, stepOrder: step.step_order }
+            data: { taskName: step.task_name, stepOrder: step.step_order }
         }));
 
         const initialEdges = [];

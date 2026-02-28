@@ -183,7 +183,7 @@ impl Service {
             let log_payload = payload.clone();
             let log_response = response_json.clone();
             tokio::spawn(async move {
-                let _ = AgentLogService::log_task(
+                let _ = AgentLogService::create(
                     &ping_db,
                     log_agent_id,
                     log_payload,
