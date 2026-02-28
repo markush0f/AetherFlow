@@ -1,4 +1,4 @@
-use crate::models::flow_step::FlowStepWithAgent;
+use crate::models::flow_step::FlowStepWithTask;
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
@@ -66,6 +66,6 @@ pub struct ExecuteFlowResponse {
 pub struct FlowWithSteps {
     #[serde(flatten)]
     pub flow: Model,
-    pub steps: Vec<FlowStepWithAgent>,
+    pub steps: Vec<FlowStepWithTask>,
     pub agents_chain: Vec<String>,
 }

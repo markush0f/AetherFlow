@@ -118,7 +118,7 @@ pub async fn add_flow_step(
     match FlowService::add_flow_step(
         &state.db,
         id,
-        payload.agent_id,
+        payload.task_id,
         payload.step_order,
         payload.config,
     )

@@ -7,7 +7,7 @@ use crate::services::{
     agent_log::Service as AgentLogService,
 };
 use reqwest::Client;
-use sea_orm::DatabaseConnection;
+use sea_orm::{DatabaseConnection, EntityTrait};
 
 pub struct Service;
 
@@ -44,15 +44,36 @@ impl Service {
 
         // 3. Sequential operation (Pass the Torch)
         for step in steps {
-            // Find the agent in charge of the step
-            let agent_opt = AgentService::get_agent_by_id(db, step.agent_id.clone())
+            // Find the task in charge of the step
+            let task_opt = db.clone();
+            let task_opt = crate::models::agent_task::Entity::find_by_id(step.task_id.clone())
+                .one(db)
+                .await
+                .map_err(|e| format!("Database error fetching task: {}", e))?;
+
+            let task = match task_opt {
+                Some(t) => t,
+                None => {
+                    let err = format!("Task {} not found for step", step.task_id);
+                    let _ = FlowExecutionRepository::update_status(
+                        db,
+                        execution_id.clone(),
+                        "Failed",
+                        Some(serde_json::json!({ "error": err })),
+                    )
+                    .await;
+                    return Err(err);
+                }
+            };
+
+            let agent_opt = AgentService::get_agent_by_id(db, task.agent_id.clone())
                 .await
                 .map_err(|e| format!("Database error fetching agent: {}", e))?;
 
             let agent = match agent_opt {
                 Some(a) => a,
                 None => {
-                    let err = format!("Agent {} not found for step", step.agent_id);
+                    let err = format!("Agent {} not found for task", task.agent_id);
                     let _ = FlowExecutionRepository::update_status(
                         db,
                         execution_id.clone(),
@@ -66,6 +87,19 @@ impl Service {
 
             // Prepare payload by dynamically acting as a template engine
             let mut payload = current_data.clone();
+
+            // Build the URL
+            let base_url = agent.endpoint.trim_end_matches('/');
+            let endpoint = match &task.path {
+                Some(p) => {
+                    if p.starts_with('/') {
+                        format!("{}{}", base_url, p)
+                    } else {
+                        format!("{}/{}", base_url, p)
+                    }
+                }
+                None => base_url.to_string(),
+            };
 
             if let Some(config) = step.config {
                 if let Some(config_obj) = config.as_object() {
@@ -138,14 +172,13 @@ impl Service {
             }
 
             // Execute the agent and handle retry resilience
-            let result = AgentClient::execute_task(http_client, &agent.endpoint, &payload).await;
+            let result = AgentClient::execute_task(http_client, &endpoint, &payload).await;
 
             let (response_json, retries_used) = match &result {
                 Ok((res, retries)) => (res.clone(), *retries),
                 Err((err_msg, retries)) => (serde_json::json!({ "error": err_msg }), *retries),
             };
 
-            // Safely log the task in agent_logs
             let ping_db = db.clone();
             let log_agent_id = agent.id.clone();
             let log_payload = payload.clone();

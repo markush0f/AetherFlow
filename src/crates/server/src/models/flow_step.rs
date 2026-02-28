@@ -10,7 +10,7 @@ pub struct Model {
 
     pub flow_id: String,
 
-    pub agent_id: String,
+    pub task_id: String,
 
     pub step_order: i32,
 
@@ -31,13 +31,13 @@ pub enum Relation {
     )]
     Flow,
     #[sea_orm(
-        belongs_to = "crate::models::agent::Entity",
-        from = "Column::AgentId",
-        to = "crate::models::agent::Column::Id",
+        belongs_to = "crate::models::agent_task::Entity",
+        from = "Column::TaskId",
+        to = "crate::models::agent_task::Column::Id",
         on_update = "NoAction",
         on_delete = "Cascade"
     )]
-    Agent,
+    AgentTask,
 }
 
 impl Related<crate::models::flow::Entity> for Entity {
@@ -46,9 +46,9 @@ impl Related<crate::models::flow::Entity> for Entity {
     }
 }
 
-impl Related<crate::models::agent::Entity> for Entity {
+impl Related<crate::models::agent_task::Entity> for Entity {
     fn to() -> RelationDef {
-        Relation::Agent.def()
+        Relation::AgentTask.def()
     }
 }
 
@@ -56,14 +56,14 @@ impl ActiveModelBehavior for ActiveModel {}
 
 #[derive(Deserialize, ToSchema)]
 pub struct CreateFlowStepPayload {
-    pub agent_id: String,
+    pub task_id: String,
     pub step_order: i32,
     pub config: Option<serde_json::Value>,
 }
 
 #[derive(Serialize, ToSchema)]
-pub struct FlowStepWithAgent {
+pub struct FlowStepWithTask {
     #[serde(flatten)]
     pub step: Model,
-    pub agent_slug: String,
+    pub task_name: String,
 }
