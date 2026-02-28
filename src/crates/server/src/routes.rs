@@ -5,6 +5,7 @@ use utoipa::openapi::OpenApi;
 use utoipa_axum::router::OpenApiRouter;
 
 mod agent;
+mod agent_task;
 mod flow;
 
 pub fn create_router() -> (Router<AppState>, OpenApi) {
@@ -16,6 +17,7 @@ pub fn create_router() -> (Router<AppState>, OpenApi) {
         )
         .route("/ws", get(crate::handlers::ws::ws_handler))
         .nest("/agents", agent::router())
+        .nest("/tasks", agent_task::router())
         .nest("/flows", flow::router())
         .split_for_parts();
 

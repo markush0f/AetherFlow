@@ -45,7 +45,6 @@ impl Service {
         // 3. Sequential operation (Pass the Torch)
         for step in steps {
             // Find the task in charge of the step
-            let task_opt = db.clone();
             let task_opt = crate::models::agent_task::Entity::find_by_id(step.task_id.clone())
                 .one(db)
                 .await
