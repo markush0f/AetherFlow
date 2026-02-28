@@ -1,29 +1,63 @@
 import React, { useState, useEffect } from "react";
-import { LucidePlus, LucideTrash, LucideX } from "./icons";
+import { LucidePlus, LucideTrash, LucideX, LucideGlobe, LucideCode, LucideTerminal } from "./icons";
+
+const TASK_TYPE_ICONS: Record<string, React.FC<any>> = {
+    endpoint: LucideGlobe,
+    function: LucideCode,
+    script: LucideTerminal,
+};
+
+const TASK_TYPE_COLORS: Record<string, string> = {
+    endpoint: "text-sky-400",
+    function: "text-violet-400",
+    script: "text-amber-400",
+};
+
+interface TaskOption {
+    id: string;
+    agent_id: string;
+    name: string;
+    task_type: string;
+    agentSlug?: string;
+}
 
 export function CreateFlowDialog({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
-    const [agents, setAgents] = useState<any[]>([]);
+    const [tasks, setTasks] = useState<TaskOption[]>([]);
     const [steps, setSteps] = useState<string[]>([]);
     const [saving, setSaving] = useState(false);
 
     useEffect(() => {
-        // Fetch agents from backend
-        fetch("http://localhost:8080/agents")
-            .then(res => res.json())
-            .then(data => {
-                const parsedAgents = data;
-                parsedAgents.sort((a: any, b: any) => a.slug.localeCompare(b.slug));
-                setAgents(parsedAgents);
-            })
-            .catch(err => console.error("Error fetching agents", err));
+        const fetchData = async () => {
+            try {
+                const [agentsRes, tasksRes] = await Promise.all([
+                    fetch("http://localhost:8080/agents"),
+                    fetch("http://localhost:8080/tasks"),
+                ]);
+                const agents = await agentsRes.json();
+                const allTasks = await tasksRes.json();
+
+                // Map agent slug to each task for display
+                const agentMap: Record<string, string> = {};
+                agents.forEach((a: any) => { agentMap[a.id] = a.slug; });
+                const enrichedTasks = allTasks.map((t: any) => ({
+                    ...t,
+                    agentSlug: agentMap[t.agent_id] || "unknown",
+                }));
+                enrichedTasks.sort((a: any, b: any) => a.agentSlug.localeCompare(b.agentSlug));
+                setTasks(enrichedTasks);
+            } catch (err) {
+                console.error("Error fetching data", err);
+            }
+        };
+        fetchData();
     }, []);
 
     const handleSave = async () => {
         if (!name) return alert("Please provide a name for the flow.");
-        if (steps.length === 0) return alert("A flow must have at least one agent step.");
-        if (steps.some(s => s === "")) return alert("Please select an agent for all steps or remove the empty step.");
+        if (steps.length === 0) return alert("A flow must have at least one step.");
+        if (steps.some(s => s === "")) return alert("Please select a task for all steps or remove the empty step.");
 
         setSaving(true);
         try {
@@ -37,14 +71,13 @@ export function CreateFlowDialog({ onClose, onSuccess }: { onClose: () => void; 
             const newFlow = await flowRes.json();
             const flowId = newFlow.id;
 
-            // 2. Create Flow Steps
+            // 2. Create Flow Steps (now referencing task_id)
             for (let i = 0; i < steps.length; i++) {
-                const stepRes = await fetch("http://localhost:8080/flow-steps", {
+                const stepRes = await fetch(`http://localhost:8080/flows/${flowId}/steps`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        flow_id: flowId,
-                        agent_slug: steps[i],
+                        task_id: steps[i],
                         step_order: i + 1
                     })
                 });
@@ -98,7 +131,7 @@ export function CreateFlowDialog({ onClose, onSuccess }: { onClose: () => void; 
                     </div>
 
                     <div className="mb-3 flex items-center justify-between">
-                        <label className="block text-xs uppercase tracking-wider font-bold text-gray-400">Agent Sequence</label>
+                        <label className="block text-xs uppercase tracking-wider font-bold text-gray-400">Task Sequence</label>
                         <button
                             onClick={() => setSteps([...steps, ""])}
                             className="text-xs font-semibold text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 hover:bg-indigo-500/20 hover:text-indigo-300 transition-colors shadow-sm"
@@ -113,45 +146,48 @@ export function CreateFlowDialog({ onClose, onSuccess }: { onClose: () => void; 
                                 <div className="bg-gray-800/50 p-3 rounded-full mb-3 text-gray-600">
                                     <LucidePlus size={24} />
                                 </div>
-                                <p>No agents added yet.</p>
+                                <p>No tasks added yet.</p>
                                 <p className="text-xs text-gray-600 mt-1">Click "Add Step" to build the pipeline.</p>
                             </div>
                         ) : (
-                            steps.map((stepSlug, idx) => (
-                                <div key={idx} className="flex gap-3 items-center bg-[#13151a] border border-gray-800/80 p-3.5 rounded-xl shadow-sm hover:border-gray-700 transition-colors">
-                                    <div className="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2 py-1.5 rounded-lg text-[10px] font-mono shrink-0 uppercase tracking-wider font-bold">
-                                        Step_0{idx + 1}
+                            steps.map((stepTaskId, idx) => {
+                                const selectedTask = tasks.find(t => t.id === stepTaskId);
+                                return (
+                                    <div key={idx} className="flex gap-3 items-center bg-[#13151a] border border-gray-800/80 p-3.5 rounded-xl shadow-sm hover:border-gray-700 transition-colors">
+                                        <div className="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2 py-1.5 rounded-lg text-[10px] font-mono shrink-0 uppercase tracking-wider font-bold">
+                                            Step_0{idx + 1}
+                                        </div>
+                                        <select
+                                            value={stepTaskId}
+                                            onChange={(e) => {
+                                                const newSteps = [...steps];
+                                                newSteps[idx] = e.target.value;
+                                                setSteps(newSteps);
+                                            }}
+                                            className="grow bg-[#0b0c10] border border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-100 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 appearance-none"
+                                            style={{ backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="%236b7280"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>')`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.75rem center', backgroundSize: '1em' }}
+                                        >
+                                            <option value="" disabled className="text-gray-500">Select a task...</option>
+                                            {tasks.map(task => (
+                                                <option key={task.id} value={task.id} className="bg-[#111318]">
+                                                    [{task.agentSlug}] {task.name} ({task.task_type})
+                                                </option>
+                                            ))}
+                                        </select>
+                                        <button
+                                            onClick={() => {
+                                                const newSteps = [...steps];
+                                                newSteps.splice(idx, 1);
+                                                setSteps(newSteps);
+                                            }}
+                                            className="text-gray-500 hover:text-rose-400 hover:bg-rose-400/10 p-2 rounded-lg border border-transparent hover:border-rose-400/20 transition-all shrink-0"
+                                            title="Remove step"
+                                        >
+                                            <LucideTrash size={16} />
+                                        </button>
                                     </div>
-                                    <select
-                                        value={stepSlug}
-                                        onChange={(e) => {
-                                            const newSteps = [...steps];
-                                            newSteps[idx] = e.target.value;
-                                            setSteps(newSteps);
-                                        }}
-                                        className="grow bg-[#0b0c10] border border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-100 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 appearance-none"
-                                        style={{ backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="%236b7280"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>')`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.75rem center', backgroundSize: '1em' }}
-                                    >
-                                        <option value="" disabled className="text-gray-500">Select an agent...</option>
-                                        {agents.map(agent => (
-                                            <option key={agent.slug} value={agent.slug} className="bg-[#111318]">
-                                                {agent.slug.replace(/-/g, ' ')}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    <button
-                                        onClick={() => {
-                                            const newSteps = [...steps];
-                                            newSteps.splice(idx, 1);
-                                            setSteps(newSteps);
-                                        }}
-                                        className="text-gray-500 hover:text-rose-400 hover:bg-rose-400/10 p-2 rounded-lg border border-transparent hover:border-rose-400/20 transition-all shrink-0"
-                                        title="Remove step"
-                                    >
-                                        <LucideTrash size={16} />
-                                    </button>
-                                </div>
-                            ))
+                                );
+                            })
                         )}
                     </div>
                 </div>

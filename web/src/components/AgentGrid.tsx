@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { LucideAlertCircle, LucideComponent, LucideSettings } from './icons';
+import { LucideAlertCircle, LucideComponent, LucideSettings, LucideChevronRight } from './icons';
+import { AgentDetailPanel } from './AgentDetailPanel';
 
 export default function AgentGrid() {
     const [agents, setAgents] = useState<any[]>([]);
     const [status, setStatus] = useState('Connecting to Gateway...');
     const [statusColor, setStatusColor] = useState('text-yellow-500');
     const [loading, setLoading] = useState(true);
+    const [selectedAgent, setSelectedAgent] = useState<any | null>(null);
 
     useEffect(() => {
         let ws: WebSocket | null = null;
@@ -100,7 +102,11 @@ export default function AgentGrid() {
                     </div>
                 ) : (
                     agents.map((agent) => (
-                        <div key={agent.id} className="bg-[#111318] border border-gray-800 rounded-2xl shadow-sm hover:border-indigo-500/40 hover:shadow-[0_4px_20px_-4px_rgba(99,102,241,0.1)] transition-all duration-300 flex flex-col h-full overflow-hidden">
+                        <div
+                            key={agent.id}
+                            className="bg-[#111318] border border-gray-800 rounded-2xl shadow-sm hover:border-indigo-500/40 hover:shadow-[0_4px_20px_-4px_rgba(99,102,241,0.1)] transition-all duration-300 flex flex-col h-full overflow-hidden cursor-pointer group"
+                            onClick={() => setSelectedAgent(agent)}
+                        >
                             <div className="p-6 flex-grow">
                                 <div className="flex justify-between items-center mb-5">
                                     <h3 className="text-xl font-bold text-gray-100 capitalize tracking-tight">{agent.slug.replace(/-/g, " ")}</h3>
@@ -114,7 +120,7 @@ export default function AgentGrid() {
                                     </div>
 
                                     <div className="bg-gray-800/30 p-3 rounded-xl border border-gray-800/60">
-                                        <span className="text-gray-500 text-[10px] uppercase font-bold tracking-wider block mb-1">Target</span>
+                                        <span className="text-gray-500 text-[10px] uppercase font-bold tracking-wider block mb-1">Base URL</span>
                                         <span className="text-indigo-400 block text-sm truncate">{agent.endpoint}</span>
                                     </div>
 
@@ -130,13 +136,11 @@ export default function AgentGrid() {
                                 </div>
                             </div>
 
-                            <div className="px-6 py-4 bg-gray-900/50 border-t border-gray-800 mt-auto flex gap-3">
-                                <button className="flex-1 bg-white hover:bg-gray-200 text-gray-900 font-semibold py-2 px-4 rounded-xl text-sm transition-all shadow-sm active:scale-[0.98]" onClick={() => alert(`Execute task on ${agent.slug}`)}>
-                                    Execute Action
-                                </button>
-                                <button className="flex-none bg-[#111318] hover:bg-gray-800 text-gray-400 hover:text-white p-2 border border-gray-800 rounded-xl transition-all" title="Settings">
-                                    <LucideSettings className="w-5 h-5 mx-auto" />
-                                </button>
+                            <div className="px-6 py-4 bg-gray-900/50 border-t border-gray-800 mt-auto flex items-center justify-between">
+                                <span className="text-xs text-gray-500 group-hover:text-gray-300 transition-colors">View tasks & services</span>
+                                <div className="text-gray-600 group-hover:text-indigo-400 transition-colors group-hover:translate-x-1 transform duration-200">
+                                    <LucideChevronRight size={18} />
+                                </div>
                             </div>
                         </div>
                     ))
@@ -146,6 +150,13 @@ export default function AgentGrid() {
             <div className={`mt-8 text-center text-sm ${statusColor}`}>
                 {status}
             </div>
+
+            {selectedAgent && (
+                <AgentDetailPanel
+                    agent={selectedAgent}
+                    onClose={() => setSelectedAgent(null)}
+                />
+            )}
         </>
     );
 }
